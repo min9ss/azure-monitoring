@@ -1,0 +1,62 @@
+// unassigned_disk.kql
+
+// 01. 디스크 총|연결|미연결 수  
+Resources
+| where type =~ "microsoft.compute/disks"
+| summarize 
+    TotalDisks      = count(),
+    AttachedDisks   = countif(properties.diskState == "Attached"),
+    UnattachedDisks = countif(properties.diskState == "Unattached")
+  by subscriptionId, resourceGroup
+| join kind=leftouter (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId,
+              subscriptionName=name
+) on subscriptionId
+| project subscription=subscriptionName,
+          resourceGroup,
+          TotalDisks,
+          AttachedDisks, 
+          UnattachedDisks
+| order by subscription, resourceGroup
+
+
+// 02. 모든 디스크 목록 및 상태
+// VM 종료 상태일 경우, 디스크 "Reserved" 상태
+// 연결되지 않은 경우, 디스크 "Unattached" 상태
+resources
+| where type =~ "Microsoft.Compute/disks"
+| parse kind=regex managedBy with "/virtualMachines/" vmName
+| join kind=leftouter hint.strategy=shuffle(
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project name, subscriptionId) on subscriptionId
+| project-away subscriptionId, subscriptionId1
+| project-rename subscription=name1
+| project name, 
+          vmName, 
+          status=properties.diskState, 
+          subscription, 
+          resourceGroup
+
+
+// 03. 미연결 디스크 목록
+resources
+| where type =~ "Microsoft.Compute/disks" and properties.diskState == "Unattached"
+| join kind=leftouter hint.strategy=shuffle(
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project name, 
+              subscriptionId
+) on subscriptionId
+| project-away subscriptionId, subscriptionId1
+| project-rename subscription=name1
+| project 
+    name,
+    status = properties.diskState, 
+    diskSizeGB = toint(properties.diskSizeGB),
+    sku = tostring(sku.name),
+    subscription, 
+    resourceGroup
+
