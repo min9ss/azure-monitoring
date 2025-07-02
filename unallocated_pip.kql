@@ -1,0 +1,63 @@
+//unallocated_pip.kql
+// 01. pip 총|연결|미연결 수 
+resources
+| where type =~ "Microsoft.Network/publicIPAddresses"
+| extend
+    ipConfigId = tostring(properties.ipConfiguration.id),
+    natGatewayId = tostring(properties.natGateway.id)
+| extend
+    ipState = iif(isnotempty(ipConfigId) or isnotempty(natGatewayId), "Assigned", "Unassigned")
+| summarize
+    totalPIPs = count(),
+    assignedPIPs = countif(ipState == "Assigned"),
+    unassignedPIPs = countif(ipState == "Unassigned")    
+
+
+// 02. pip 리스트
+resources
+| where type =~ "Microsoft.Network/publicIPAddresses"
+| extend
+    ipConfigId = tostring(properties.ipConfiguration.id),
+    natGatewayId = tostring(properties.natGateway.id),
+    shortSubId = tostring(subscriptionId)
+| extend
+    subscriptionId = strcat("/subscriptions/", shortSubId)
+| extend
+    ipState = iif(isnotempty(ipConfigId) or isnotempty(natGatewayId), "Assigned", "Unassigned")
+| join kind=inner (
+    resourcecontainers
+    | where type == "microsoft.resources/subscriptions"
+    | project subscriptionId = id, subscriptionName = name
+) on subscriptionId
+| project 
+    name, 
+    ipAddress = tostring(properties.ipAddress), 
+    ipState,
+    resourceGroup, 
+    subscriptionName
+| order by subscriptionName asc, resourceGroup asc
+
+
+// 03. pip 미사용 목록
+resources
+| where type =~ "Microsoft.Network/publicIPAddresses"
+| extend
+    ipConfigId = tostring(properties.ipConfiguration.id),
+    natGatewayId = tostring(properties.natGateway.id),
+    shortSubId = tostring(subscriptionId)
+| extend
+    subscriptionId = strcat("/subscriptions/", shortSubId)
+| extend
+    ipState = iif(isnotempty(ipConfigId) or isnotempty(natGatewayId), "Assigned", "Unassigned")
+| where ipState == "Unassigned"
+| join kind=inner (
+    resourcecontainers
+    | where type == "microsoft.resources/subscriptions"
+    | project subscriptionId = id, 
+              subscriptionName = name
+) on subscriptionId
+| project name, 
+          ipAddress = tostring(properties.ipAddress), 
+          resourceGroup, 
+          subscriptionName
+| order by subscriptionName, resourceGroup
