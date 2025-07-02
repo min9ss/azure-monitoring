@@ -1,0 +1,87 @@
+// Az-VM.kql
+// 01. Azure vm 목록 
+resources
+| where type =~ "Microsoft.Compute/disks"
+| parse kind=regex managedBy with "/virtualMachines/" vmName
+| join kind=leftouter hint.strategy=shuffle(
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionName = tostring(name), subscriptionId = tostring(subscriptionId)
+) on subscriptionId
+| project-away subscriptionId, subscriptionId1
+| extend 
+    finalSku = iif(isnotempty(sku.name), tostring(sku.name),
+               iif(isnotempty(properties.sku.name), tostring(properties.sku.name),
+               iif(isnotempty(properties.accountType), tostring(properties.accountType), "")))
+| extend 
+    storageType = case(
+        finalSku =~ "Premium_LRS", "Premium SSD",
+        finalSku =~ "PremiumV2_LRS", "Premium SSD v2",
+        finalSku =~ "StandardSSD_LRS", "Standard SSD",
+        finalSku =~ "Standard_LRS", "Standard HDD",
+        finalSku =~ "UltraSSD_LRS", "Ultra Disk",
+        finalSku =~ "Standard_ZRS", "Standard ZRS HDD",
+        finalSku =~ "Premium_ZRS", "Premium ZRS SSD",
+        isnotempty(finalSku), finalSku,  // 디버깅용 fallback
+        "Unknown"
+    )
+| project 
+    name = tostring(name),
+    vmName = coalesce(tostring(vmName), "Not Attached"),
+    status = tostring(properties.diskState),
+    diskSizeGB = toint(properties.diskSizeGB),
+    storageType,
+    location = tostring(location),
+    resourceGroup = tostring(resourceGroup),
+    subscription = tostring(subscriptionName)
+| order by name asc
+
+
+// 02. 실행중인 VM 
+Resources
+| where type == "microsoft.compute/virtualmachines"
+| project vmState = tostring(properties.extended.instanceView.powerState.displayStatus)
+| where vmState contains "VM running"
+| summarize count()
+
+// 02-1. 중지된 VM 수
+Resources 
+| where type == "microsoft.compute/virtualmachines"
+| extend vmState = tostring(properties.extended.instanceView.powerState.displayStatus)
+| project vmState
+| where vmState contains "VM deallocated"
+| summarize count() by vmState 
+
+
+// 03. 최근 12h 이내 VM 변경 사항
+resourcechanges
+| where properties.targetResourceType =~ 'microsoft.compute/virtualmachines'
+    and properties.changeAttributes.correlationId != '00000000-0000-0000-0000-000000000000'
+    and (
+        properties.changeAttributes.operation =~ "Microsoft.Compute/virtualMachines/start/action"
+        or properties.changeAttributes.operation =~ "Microsoft.Compute/virtualMachines/deallocate/action"
+        or properties.changeAttributes.operation =~ "Microsoft.Compute/virtualMachines/restart/action"
+    )
+| extend changeTime = todatetime(properties.changeAttributes.timestamp)
+| where changeTime > ago(12h)
+| extend LocalTime = datetime_utc_to_local(changeTime, 'Asia/Seoul')
+| parse properties.targetResourceId with '/subscriptions/' subscriptionId '/resourceGroups/' resourceGroup '/providers/Microsoft.Compute/virtualMachines/' vmName
+| parse properties.changeAttributes.operation with * '/' * '/' ActionType '/' *
+| project LocalTime, vmName, ActionType, changedBy = properties.changeAttributes.changedBy, correlationId = tostring(properties.changeAttributes.correlationId), subscriptionId, resourceGroup
+| join kind=leftouter hint.strategy=shuffle (
+    resourcecontainers
+    | where type =~ 'microsoft.resources/subscriptions'
+    | project name, subscriptionId
+) on subscriptionId
+| project-away subscriptionId, subscriptionId1
+| project-rename subscription = name
+| summarize
+    ActionTime = arg_max(LocalTime, LocalTime),
+    subscription = make_set(subscription),
+    resourceGroup = make_set(resourceGroup),
+    VmName = make_set(vmName),
+    ActionType = make_set(ActionType),
+    User = make_set(changedBy)
+by correlationId
+| project ActionTime, subscription, resourceGroup, VmName, ActionType, User, correlationId
+| order by ActionTime desc
