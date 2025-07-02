@@ -1,5 +1,4 @@
 // unassigned_disk.kql
-
 // 01. 디스크 총|연결|미연결 수  
 Resources
 | where type =~ "microsoft.compute/disks"
