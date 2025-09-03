@@ -1,2 +1,2 @@
-# azure-kql-library
+# azure-monitoring
 Az Resource Graph qurey
