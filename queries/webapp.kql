@@ -1,0 +1,159 @@
+// WebApp 전체/실행/중지 카운트
+Resources
+| where type =~ "microsoft.web/sites"
+| summarize
+    totalWebApps   = count(),
+    runningWebApps = countif(properties.state == "Running"),
+    stoppedWebApps = countif(properties.state != "Running")
+
+
+// ----------------------------------------------------------------------------------------------- //
+
+
+// WebApp 상세 목록 + App Service Plan 정보
+Resources
+| where type =~ "microsoft.web/sites"
+| extend appServicePlanId = tostring(properties.serverFarmId)
+| extend appServicePlanId = tolower(split(appServicePlanId, "/")[8])
+| extend state            = tostring(properties.state)
+| extend defaultHostName  = tostring(properties.defaultHostName)
+| extend enabledHostNames = strcat_array(todynamic(properties.enabledHostNames), ", ")
+| extend inboundIpAddress = tostring(properties.inboundIpAddress)
+| project
+    webAppName = name,
+    resourceGroup,
+    location,
+    defaultHostName,
+    enabledHostNames,
+    inboundIpAddress,
+    appServicePlanId,
+    state
+| join kind=leftouter (
+    Resources
+    | where type =~ "microsoft.web/serverfarms"
+    | extend appServicePlanId = tolower(name)
+    | project
+        appServicePlanId,
+        appServicePlanName = name,
+        sku     = tostring(sku.tier),
+        capacity= tostring(sku.capacity)
+) on appServicePlanId
+| project
+    webAppName,
+    resourceGroup,
+    location,
+    defaultHostName,
+    enabledHostNames,
+    inboundIpAddress,
+    state,
+    appServicePlanName,
+    sku,
+    capacity
+| order by resourceGroup, webAppName
+
+
+// ----------------------------------------------------------------------------------------------- //
+
+
+// 전체 슬롯 개수
+Resources
+| where type =~ "microsoft.web/sites/slots"
+| summarize totalSlotCount = count()
+
+
+// ----------------------------------------------------------------------------------------------- //
+
+
+// 슬롯 상세 목록
+Resources
+| where type =~ "microsoft.web/sites/slots"
+| project
+    slotName          = tostring(split(name, "/")[1]),
+    appName           = tostring(split(name, "/")[0]),
+    resourceGroup,
+    location,
+    state             = tostring(properties.state),
+    url               = tostring(properties.enabledHostNames[0]),
+    appServicePlanName= tostring(split(properties.serverFarmId, "/")[-1])
+| order by appName, slotName
+
+
+// ----------------------------------------------------------------------------------------------- //
+
+
+// WebApp 별 슬롯 수
+Resources
+| where type =~ "microsoft.web/sites"
+| extend appName = tostring(name)
+| join kind=leftouter (
+    Resources
+    | where type =~ "microsoft.web/sites/slots"
+    | extend appName = tostring(split(name, "/")[0])
+    | summarize slotCount = count() by appName, resourceGroup
+) on appName, resourceGroup
+| project
+    appName,
+    resourceGroup,
+    slotCount = coalesce(slotCount, 0)
+
+
+// ----------------------------------------------------------------------------------------------- //
+
+
+// 최근 7일 슬롯 변경 이벤트 카운트
+resourcechanges
+| where properties.targetResourceType == "microsoft.web/sites/slots"
+| extend changeTime   = todatetime(properties.changeAttributes.timestamp)
+| where changeTime > ago(7d)
+| extend
+    slotName     = tostring(split(properties.targetResourceId, "/")[-1]),
+    appName      = tostring(split(properties.targetResourceId, "/")[-3]),
+    resourceGroup= tostring(split(properties.targetResourceId, "/")[4]),
+    changeType   = tostring(properties.changeType),
+    previousState= tostring(properties.changes["properties.state"].previousValue),
+    newState     = tostring(properties.changes["properties.state"].newValue)
+| extend stateChange = iff(changeType == "Update", strcat(previousState, " → ", newState), "")
+| summarize TotalEventCount = count()
+
+
+// ----------------------------------------------------------------------------------------------- //
+
+
+// 슬롯 변경 작업 상세 로그
+resourcechanges
+| where properties.targetResourceType == "microsoft.web/sites/slots"
+| extend changeTime   = todatetime(properties.changeAttributes.timestamp)
+| where changeTime > ago(7d)
+| extend
+    slotName     = tostring(split(properties.targetResourceId, "/")[-1]),
+    appName      = tostring(split(properties.targetResourceId, "/")[-3]),
+    resourceGroup= tostring(split(properties.targetResourceId, "/")[4]),
+    changeType   = tostring(properties.changeType),
+    previousState= tostring(properties.changes["properties.state"].previousValue),
+    newState     = tostring(properties.changes["properties.state"].newValue)
+| project
+    changeTime,
+    changeType,
+    slotName,
+    appName,
+    resourceGroup,
+    stateChange = iff(changeType == "Update", strcat(previousState, " → ", newState), ""),
+    newState
+| order by changeTime desc
+
+
+// ----------------------------------------------------------------------------------------------- //
+
+
+// WebApp SSL 인증서 상태
+Resources
+| where type =~ "microsoft.web/sites"
+| extend sslCertStatus = properties.hostNameSslStates
+| mv-expand sslCertStatus
+| project
+    appName       = tostring(name),
+    hostName      = tostring(sslCertStatus.name),
+    sslState      = tostring(sslCertStatus.sslState),
+    certThumbprint= tostring(sslCertStatus.thumbprint)
+| where not(hostName contains ".scm.")   // SCM 도메인 제외
+| order by appName, hostName

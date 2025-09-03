@@ -1,0 +1,104 @@
+// AKS 총계 / 상태별 카운트
+
+Resources
+| where type =~ "microsoft.containerservice/managedclusters"
+| extend provisioningState = tostring(properties.provisioningState)
+       , powerState        = tostring(properties.powerState.code)  // 예: "Running", "Stopped"
+| summarize
+    totalAKSCount    = count(),
+    runningAKSCount  = countif(tolower(powerState) == "running" or provisioningState =~ "Succeeded"),
+    stoppedAKSCount  = countif(tolower(powerState) == "stopped"),
+    failedAKSCount   = countif(provisioningState =~ "Failed")
+
+// ----------------------------------------------------------------------------------------------- //
+
+// AKS 목록 
+
+Resources
+| where type =~ "microsoft.containerservice/managedclusters"
+| extend kubernetesVersion = tostring(properties.kubernetesVersion)
+| join kind=leftouter (
+    ResourceContainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId, subscriptionName = name
+) on subscriptionId
+| project
+    subscriptionName,
+    name,
+    resourceGroup,
+    location,
+    kubernetesVersion
+| order by subscriptionName, resourceGroup, name
+
+// ----------------------------------------------------------------------------------------------- //
+
+// 클러스터별 노드풀 상세 (노드 수, 오토스케일 범위, VM 사이즈, OS, 모드)
+
+Resources
+| where type =~ "microsoft.containerservice/managedclusters"
+| extend clusterName       = tostring(name),
+         clusterVersion    = tostring(properties.kubernetesVersion),
+         powerState        = tostring(properties.powerState.code),
+         provisioningState = tostring(properties.provisioningState),
+         pools             = properties.agentPoolProfiles
+| mv-expand pool = pools
+| where pool['count'] > 0
+| extend
+    nodePoolName     = tostring(pool.name),
+    instanceCount    = toint(pool['count']),
+    enableAutoScale  = bool(pool.enableAutoScaling),
+    minNodeCount     = iif(enableAutoScale, toint(pool.minCount), int(null)),
+    maxNodeCount     = iif(enableAutoScale, toint(pool.maxCount), int(null)),
+    vmSize           = tostring(pool.vmSize),
+    osType           = tostring(pool.osType),
+    nodePoolMode     = tostring(pool.mode)         // User/System
+| project
+    clusterName,
+    resourceGroup,
+    location,
+    clusterVersion,
+    powerState,
+    provisioningState,
+    nodePoolName,
+    instanceCount,
+    minNodeCount,
+    maxNodeCount,
+    enableAutoScale,
+    vmSize,
+    osType,
+    nodePoolMode
+| order by clusterName, resourceGroup, nodePoolName
+
+// ----------------------------------------------------------------------------------------------- //
+
+// 최근 24시간 AKS 변경 이력 (생성/삭제/시작/중지)
+resourcechanges
+| where properties.targetResourceType =~ "Microsoft.ContainerService/managedClusters"
+| extend ridParts = split(properties.targetResourceId, "/")
+| extend subscriptionId = tostring(ridParts[2]),
+         resourceGroup  = tostring(ridParts[4]),
+         aksName        = tostring(ridParts[8]),
+         changeTime     = todatetime(properties.changeAttributes.timestamp)
+| where changeTime > ago(24h)
+| extend operation = case(
+    properties.changeAttributes.operation contains "/write",        "Create/Update",
+    properties.changeAttributes.operation contains "/delete/action","Delete",
+    properties.changeAttributes.operation contains "/stop/action",  "Stop",
+    properties.changeAttributes.operation contains "/start/action", "Start",
+    "Unknown")
+| where operation != "Unknown"
+| join kind=leftouter (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId, subscriptionName = name
+) on subscriptionId
+| project
+    changeTime,
+    aksName,
+    resourceGroup,
+    subscriptionName,
+    operation,
+    changedBy = tostring(properties.changeAttributes.changedBy)
+| order by changeTime desc
+| limit 100
+

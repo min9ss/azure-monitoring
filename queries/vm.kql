@@ -1,0 +1,238 @@
+// vm_배포된 지역
+
+Resources
+| where type =~ "Microsoft.Compute/virtualMachines"
+| summarize total = count() by location
+| extend region = case(
+    location =~ "eastasia", "East Asia",
+    location =~ "southeastasia", "Southeast Asia",
+    location =~ "centralus", "Central US",
+    location =~ "eastus", "East US",
+    location =~ "eastus2", "East US 2",
+    location =~ "westus", "West US",
+    location =~ "westus2", "West US 2",
+    location =~ "westcentralus", "West Central US",
+    location =~ "northcentralus", "North Central US",
+    location =~ "southcentralus", "South Central US",
+    location =~ "northeurope", "North Europe",
+    location =~ "westeurope", "West Europe",
+    location =~ "australiaeast", "Australia East",
+    location =~ "australiasoutheast", "Australia Southeast",
+    location =~ "canadacentral", "Canada Central",
+    location =~ "canadaeast", "Canada East",
+    location =~ "uksouth", "UK South",
+    location =~ "ukwest", "UK West",
+    location =~ "koreacentral", "Korea Central",
+    location =~ "koreasouth", "Korea South",
+    location =~ "japaneast", "Japan East",
+    "N/A")
+| where region != "N/A"
+| extend latitude = case(
+    location =~ "eastasia", 22.267,
+    location =~ "southeastasia", 1.283,
+    location =~ "centralus", 41.5908,
+    location =~ "eastus", 37.3719,
+    location =~ "eastus2", 36.6681,
+    location =~ "westus", 37.783,
+    location =~ "westus2", 47.233,
+    location =~ "westcentralus", 40.890,
+    location =~ "northcentralus", 41.8819,
+    location =~ "southcentralus", 29.4167,
+    location =~ "northeurope", 53.3478,
+    location =~ "westeurope", 52.3667,
+    location =~ "australiaeast", -33.86,
+    location =~ "australiasoutheast", -37.8136,
+    location =~ "canadacentral", 43.653,
+    location =~ "canadaeast", 46.817,
+    location =~ "uksouth", 50.941,
+    location =~ "ukwest", 53.427,
+    location =~ "koreacentral", 37.5665,
+    location =~ "koreasouth", 35.1796,
+    location =~ "japaneast", 35.6895,
+    0.0)
+| extend longitude = case(
+    location =~ "eastasia", 114.188,
+    location =~ "southeastasia", 103.833,
+    location =~ "centralus", -93.6208,
+    location =~ "eastus", -79.8164,
+    location =~ "eastus2", -78.3889,
+    location =~ "westus", -122.417,
+    location =~ "westus2", -119.852,
+    location =~ "westcentralus", -110.234,
+    location =~ "northcentralus", -87.6278,
+    location =~ "southcentralus", -98.5,
+    location =~ "northeurope", -6.2597,
+    location =~ "westeurope", 4.9,
+    location =~ "australiaeast", 151.2094,
+    location =~ "australiasoutheast", 144.9631,
+    location =~ "canadacentral", -79.383,
+    location =~ "canadaeast", -71.217,
+    location =~ "uksouth", -0.799,
+    location =~ "ukwest", -3.084,
+    location =~ "koreacentral", 126.9780,
+    location =~ "koreasouth", 129.0756,
+    location =~ "japaneast", 139.6917,
+    0.0)
+| project total, region, latitude, longitude
+
+// ----------------------------------------------------------------------------------------------- //
+
+// vm_전체상태
+
+Resources
+| where type =~ "Microsoft.Compute/virtualMachines"
+| extend vmStateCode = tolower(tostring(properties.extended.instanceView.powerState.code))
+| summarize
+    totalVMs = count(),
+    runningCount = countif(vmStateCode == "powerstate/running"),
+    deallocatedCount = countif(vmStateCode == "powerstate/deallocated")
+
+// ----------------------------------------------------------------------------------------------- //
+
+// vm_리스트
+resources
+| where (type =~ "microsoft.hybridcompute/machines" and kind =~ "AVS")
+   or type =~ "microsoft.compute/virtualmachines"
+| mvexpand nic = properties.networkProfile.networkInterfaces
+| project
+    subscriptionId,
+    name,
+    powerState = coalesce(properties.powerState,
+                          properties.status.powerState,
+                          tostring(split(tolower(properties.extended.instanceView.powerState.code),"powerstate/")[1])),
+    resourceGroup,
+    location,
+    vmSize = coalesce(tostring(properties.hardwareProfile.vmSize), "-"),
+    os = case(
+        properties.storageProfile.osDisk.osType =~ "Windows" or properties.osProfile.osType =~ "Windows","Windows",
+        properties.storageProfile.osDisk.osType =~ "Linux"   or properties.osProfile.osType =~ "Linux","Linux",
+        "-"),
+    nicId = tostring(tolower(nic.id))
+| join kind=leftouter hint.strategy=shuffle (
+    resources
+    | where type =~ "Microsoft.Network/networkInterfaces"
+    | mvexpand ipconfig = properties.ipConfigurations limit 400
+    | parse kind=regex tostring(ipconfig.properties.subnet.id)
+           with "/virtualNetworks/" virtualNetwork "/subnets/" subnet
+    | project nicId = tolower(id),
+              publicIpId = tostring(ipconfig.properties.publicIPAddress.id),
+              privateIPAddress = tostring(ipconfig.properties.privateIPAddress),
+              virtualNetwork
+) on nicId
+| join kind=leftouter hint.strategy=shuffle (
+    resources
+    | where type =~ "microsoft.network/publicipaddresses"
+    | project publicIpId = tostring(id),
+              publicIpAddress = tostring(properties.ipAddress)
+) on publicIpId
+| project-away nicId, nicId1, publicIpId, publicIpId1
+| join kind=leftouter hint.strategy=shuffle (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionName = name, subscriptionId
+) on subscriptionId
+| project-away subscriptionId, subscriptionId1
+| project subscriptionName, name, resourceGroup, location, powerState,
+          virtualNetwork, publicIpAddress, privateIPAddress, vmSize, os
+| order by subscriptionName, resourceGroup, name
+
+// ----------------------------------------------------------------------------------------------- //
+
+//디스크_연결 및 미연결
+Resources
+| where type =~ "Microsoft.Compute/disks"
+| extend diskState = tostring(properties.diskState)
+| summarize
+    unattachedDisks = countif(diskState == "Unattached"),
+    otherDisks      = countif(diskState in ("Attached","Reserved"))
+
+
+// ----------------------------------------------------------------------------------------------- //
+
+//vm_변경(24h이내)
+resourcechanges
+| where type == "microsoft.resources/changes"
+| extend timestamp = todatetime(properties.changeAttributes.timestamp),
+         change_type = properties.changeType,
+         resource = tostring(split(properties.targetResourceType, "/")[array_length(split(properties.targetResourceType, "/")) - 1])
+| where timestamp >= ago(24h) and resource == "virtualmachines"
+| summarize
+    create = countif(change_type == "Create"),
+    delete = countif(change_type == "Delete")
+
+// ----------------------------------------------------------------------------------------------- //
+
+// vm_pip 수
+resources
+| where type contains "publicIPAddresses" and isnotempty(properties.ipConfiguration.id)
+| extend associatedResourceId = tostring(properties.ipConfiguration.id)
+| where associatedResourceId contains "Microsoft.Network/networkInterfaces"
+| summarize totalIPCount = count()
+
+// ----------------------------------------------------------------------------------------------- //
+
+// vmss_리스트(aks 필터링)
+resources
+| where type =~ "microsoft.compute/virtualmachinescalesets"
+| where not(name has "aks" or name has "akswin")
+| where not(resourceGroup startswith "MC_")
+| where not(resourceGroup has "aks" or resourceGroup has "akswin" or resourceGroup has "aks-node-rg")
+| project
+    scaleSetName = tostring(name),
+    resourceGroup = tostring(resourceGroup),
+    location = tostring(location),
+    skuName = tostring(sku.name),
+    skuTier = tostring(sku.tier),
+    capacity = toint(sku.capacity),
+    orchestrationMode = tostring(properties.orchestrationMode),
+    singlePlacementGroup = tostring(properties.singlePlacementGroup),
+    upgradePolicy = tostring(properties.upgradePolicy.mode),
+    timeCreated = todatetime(properties.timeCreated)
+| limit 100
+
+// ----------------------------------------------------------------------------------------------- //
+
+//vm_활동로그(24h이내)
+resourcechanges
+| where type == "microsoft.resources/changes"
+| extend timestamp     = todatetime(properties.changeAttributes.timestamp),
+         change_type   = properties.changeType,
+         changed_by    = properties.changeAttributes.changedBy,
+         resource      = tostring(split(properties.targetResourceType, "/")[array_length(split(properties.targetResourceType, "/")) - 1]),
+         resource_name = tostring(split(properties.targetResourceId, "/")[array_length(split(properties.targetResourceId, "/")) - 1]),
+         resource_group= tostring(extract(@"resourceGroups/([^/]+)", 1, tostring(properties.targetResourceId)))
+| where resource == "virtualmachines"
+| where timestamp >= ago(24h) and change_type != "Update"
+| project format_datetime(timestamp,'yyyy/MM/dd HH:mm:ss'),
+          tostring(resource), tostring(resource_group),
+          tostring(resource_name), tostring(changed_by), tostring(change_type)
+| order by timestamp desc
+
+// ----------------------------------------------------------------------------------------------- //
+
+// vm_디스크리스트
+resources
+| where type =~ "Microsoft.Compute/disks"
+| parse kind=regex managedBy with "/virtualMachines/" vmName
+| join kind=leftouter hint.strategy=shuffle (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionName = tostring(name), subscriptionId = tostring(subscriptionId)
+) on subscriptionId
+| project-away subscriptionId, subscriptionId1
+| extend storageType = case(
+    sku.name =~ "Premium_LRS",      "Premium SSD",
+    sku.name =~ "StandardSSD_LRS",  "Standard SSD",
+    sku.name =~ "Standard_LRS",     "Standard HDD",
+    "Unknown")
+| project
+    name = tostring(name),
+    vmName = coalesce(tostring(vmName), "Not Attached"),
+    status = tostring(properties.diskState),
+    diskSizeGB = toint(properties.diskSizeGB),
+    storageType,
+    location = tostring(location),
+    resourceGroup = tostring(resourceGroup),
+    subscription = tostring(subscriptionName)
+| order by name asc
+
