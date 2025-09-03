@@ -1,0 +1,308 @@
+// =================================================================================================
+// Network – Azure Resource Graph KQL
+// - 미사용 Public IP
+// - 네트워크 변경(24h)
+// - VNet / Subnet / Peering
+// - NSG 개수/룰
+// - LB & AGW Frontend IP
+// - VPN 게이트웨이 목록
+// - Service Health (네트워크 관련 Active 이벤트)
+// =================================================================================================
+
+
+/*--------------------------------------------------------------------------------------------------
+  미사용 Public IP - Count
+--------------------------------------------------------------------------------------------------*/
+resources
+| where type =~ "microsoft.network/publicipaddresses"
+| where isempty(properties.ipConfiguration) and isempty(properties.natGateway)
+| count
+
+
+
+/*--------------------------------------------------------------------------------------------------
+  미사용 Public IP - List
+--------------------------------------------------------------------------------------------------*/
+resources
+| where type =~ "microsoft.network/publicipaddresses"
+| where isempty(properties.ipConfiguration) and isempty(properties.natGateway)
+| join kind=leftouter (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId, subsName = name
+) on subscriptionId
+| project name, info = strcat("(", subsName, "/", resourceGroup, ")")
+| order by subsName, resourceGroup, name asc
+
+
+
+/*--------------------------------------------------------------------------------------------------
+  네트워크 리소스 생성/삭제 Count (최근 24h)
+--------------------------------------------------------------------------------------------------*/
+resourcechanges
+| where properties.targetResourceType contains "microsoft.Network"
+| where properties.changeAttributes.correlationId != "00000000-0000-0000-0000-000000000000"
+| where todatetime(properties.changeAttributes.timestamp) > ago(24h)
+| where properties.changeType in~ ("create","delete")
+| count
+
+
+
+/*--------------------------------------------------------------------------------------------------
+  네트워크 리소스 생성/삭제 구독별 집계 (최근 24h)
+--------------------------------------------------------------------------------------------------*/
+resourcechanges
+| where properties.targetResourceType contains "microsoft.Network"
+| where properties.changeAttributes.correlationId != "00000000-0000-0000-0000-000000000000"
+| where todatetime(properties.changeAttributes.timestamp) > ago(24h)
+| where properties.changeType in~ ("create","delete")
+| summarize Count = count() by subscriptionId
+| join kind=inner (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId, subsName = name
+) on subscriptionId
+| project subsName, Count
+| order by Count desc
+
+
+
+/*--------------------------------------------------------------------------------------------------
+  네트워크 변경 작업 묶음 요약 (최근 24h, correlationId 단위)
+--------------------------------------------------------------------------------------------------*/
+resourcechanges
+| where properties.targetResourceType contains "microsoft.Network"
+| where properties.changeAttributes.correlationId != "00000000-0000-0000-0000-000000000000"
+| where todatetime(properties.changeAttributes.timestamp) > ago(24h)
+| where properties.changeType in~ ("create","delete")
+| extend tsKST = datetime_add('hour', 9, todatetime(properties.changeAttributes.timestamp))
+| extend changeTime = format_datetime(tsKST, "yy-MM-dd [HH:mm]")
+| parse properties.targetResourceId with * "/Microsoft.Network/" resType "/" resName
+| project changeTime, resType, resName, changeType = properties.changeType,
+          changedBy = tostring(properties.changeAttributes.changedBy),
+          correlationId, subscriptionId, resourceGroup
+| join kind=leftouter (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId, subscription = name
+) on subscriptionId
+| summarize
+    ActionTime = arg_max(changeTime, changeTime),
+    subscription = make_set(subscription),
+    resourceGroup = make_set(resourceGroup),
+    Resources = make_set(strcat(resName, "(", resType, ")")),
+    changeType = make_set(changeType),
+    User = make_set(changedBy)
+  by correlationId
+| project ActionTime,
+         subs = strcat_array(subscription, ","),
+         rg = strcat_array(resourceGroup, ","),
+         Resource = strcat("Total:", tostring(array_length(Resources)), " / ", strcat_array(Resources, ", ")),
+         changeType = strcat_array(changeType, ","),
+         User = strcat_array(User, ", "),
+         correlationId
+| order by ActionTime desc
+
+
+
+/*--------------------------------------------------------------------------------------------------
+  VNet 개수 (구독별)
+--------------------------------------------------------------------------------------------------*/
+resources
+| where type =~ "microsoft.network/virtualnetworks"
+| summarize Count = count() by subscriptionId
+| join kind=inner (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId, subsName = name
+) on subscriptionId
+| project subsName, Count
+
+
+
+/*--------------------------------------------------------------------------------------------------
+  VNet 상세 (주소공간/서브넷 수/피어링 대상)
+--------------------------------------------------------------------------------------------------*/
+let vnetBase =
+resources
+| where type =~ "microsoft.network/virtualnetworks"
+| project id, subscriptionId, resourceGroup, VnetName = name,
+          IpPrefix = tostring(properties.addressSpace.addressPrefixes),
+          Snet = array_length(todynamic(properties.subnets));
+let vnetPeer =
+resources
+| where type =~ "microsoft.network/virtualnetworks"
+| mv-expand p = properties.virtualNetworkPeerings
+| extend remoteId = tostring(p.properties.remoteVirtualNetwork.id)
+| parse remoteId with * "/resourceGroups/" rg1 "/providers/Microsoft.Network/virtualNetworks/" remoteVnetName
+| project id, remoteVnetName;
+vnetBase
+| join kind=leftouter vnetPeer on id
+| summarize Peering = make_set(remoteVnetName) by id, subscriptionId, resourceGroup, VnetName, IpPrefix, Snet
+| join kind=leftouter (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId, subscription = name
+) on subscriptionId
+| project subscription, resourceGroup, VnetName,
+          IpPrefix = replace(@"['""\[\]]", "", tostring(IpPrefix)),
+          Snet, Peering = strcat_array(Peering, ", ")
+| order by subscription, resourceGroup, VnetName asc
+
+
+/*--------------------------------------------------------------------------------------------------
+  Subnet 목록 (NSG 포함)
+--------------------------------------------------------------------------------------------------*/
+resources
+| where type =~ "microsoft.network/virtualnetworks"
+| join kind=leftouter (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId, subscription = name
+) on subscriptionId
+| mv-expand SubNet = properties.subnets
+| extend snetPrefix = strcat_array(todynamic(SubNet.properties.addressPrefixes), "")
+| project subscription,
+         resourceGroup,
+         Vnet = name,
+         Snet_Name = tostring(SubNet.name),
+         IP_Prefix = coalesce(tostring(SubNet.properties.addressPrefix), snetPrefix),
+         NSG = coalesce(tostring(split(SubNet.properties.networkSecurityGroup.id, "/")[8]), "No NSG")
+| order by subscription, resourceGroup, Vnet, Snet_Name
+
+
+
+/*--------------------------------------------------------------------------------------------------
+  NSG 개수 (구독별)
+--------------------------------------------------------------------------------------------------*/
+resources
+| where type =~ "microsoft.network/networksecuritygroups"
+| summarize Count = count() by subscriptionId
+| join kind=inner (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId, subsName = name
+) on subscriptionId
+| project subsName, Count
+
+
+
+/*--------------------------------------------------------------------------------------------------
+  NSG 룰 상세
+--------------------------------------------------------------------------------------------------*/
+resources
+| where type =~ "microsoft.network/networksecuritygroups"
+| join kind=leftouter (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId, subscription = name
+) on subscriptionId
+| mv-expand rules = properties.securityRules
+| project
+    subscription, resourceGroup, name,
+    direction   = tostring(rules.properties.direction),
+    RuleName    = tostring(rules.name),
+    Priority    = toint(rules.properties.priority),
+    access      = tostring(rules.properties.access),
+    Protocol    = toupper(tostring(rules.properties.protocol)),
+    SourceIp    = strcat(strcat_array(todynamic(rules.properties.sourceAddressPrefixes), ", "),
+                         tostring(rules.properties.sourceAddressPrefix)),
+    SourcePort  = strcat(strcat_array(todynamic(rules.properties.sourcePortRanges), ", "),
+                         tostring(rules.properties.sourcePortRange)),
+    DestinationIp   = strcat(strcat_array(todynamic(rules.properties.destinationAddressPrefixes), ", "),
+                             tostring(rules.properties.destinationAddressPrefix)),
+    DestinationPort = strcat(strcat_array(todynamic(rules.properties.destinationPortRanges), ", "),
+                             tostring(rules.properties.destinationPortRange))
+| order by name asc, direction asc, Priority asc
+
+
+
+/*--------------------------------------------------------------------------------------------------
+  LB & AGW Frontend IP 목록 (통합)
+--------------------------------------------------------------------------------------------------*/
+let lb = resources
+| where type =~ "microsoft.network/loadbalancers"
+| project id, type, name, subscriptionId, resourceGroup, properties
+| mv-expand fe = properties.frontendIPConfigurations
+| project id, type, name, subscriptionId, resourceGroup, FrontendIP = tostring(fe.properties.publicIPAddress.id);
+let agw = resources
+| where type =~ "microsoft.network/applicationgateways"
+| project id, type, name, subscriptionId, resourceGroup, properties
+| mv-expand fe = properties.frontendIPConfigurations
+| project id, type, name, subscriptionId, resourceGroup, FrontendIP = tostring(fe.properties.publicIPAddress.id);
+lb
+| union agw
+| join kind=inner (
+    resources
+    | where type =~ "microsoft.network/publicipaddresses"
+    | project FrontendIP = id, IP = properties.ipAddress
+) on FrontendIP
+| join kind=leftouter (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId, subscription = name
+) on subscriptionId
+| summarize IP = make_set(IP) by type, subscription, resourceGroup, name
+| project Type = case(type =~ "microsoft.network/applicationgateways","AGW","LB"),
+         subscription, resourceGroup, Name = name,
+         ["Frontend IP"] = strcat_array(IP, ", ")
+| order by Type, subscription, resourceGroup, Name
+
+
+
+/*--------------------------------------------------------------------------------------------------
+  VPN 게이트웨이 목록 (S2S 상태 + P2S 주소 풀 + 게이트웨이 IP)
+--------------------------------------------------------------------------------------------------*/
+resources
+| where type =~ "microsoft.network/virtualnetworkgateways"
+| join kind=leftouter (
+    resourcecontainers
+    | where type =~ "microsoft.resources/subscriptions"
+    | project subscriptionId, subscriptionName = name
+) on subscriptionId
+| join kind=leftouter (
+    resources
+    | where type =~ "microsoft.network/connections"
+    | project id = tostring(properties.virtualNetworkGateway1.id),
+              Status = tostring(properties.connectionStatus)
+) on id
+| project subscriptionName, resourceGroup, name,
+          SKU = tostring(properties.sku.name),
+          Status,
+          FrontendIP = tostring(properties.ipConfigurations[0].properties.publicIPAddress.id),
+          P2S = strcat_array(todynamic(properties.vpnClientConfiguration.vpnClientAddressPool.addressPrefixes), ",")
+| join kind=leftouter (
+    resources
+    | where type =~ "microsoft.network/publicipaddresses"
+    | project FrontendIP = id, GatewayIP = properties.ipAddress
+) on FrontendIP
+| project subscriptionName, resourceGroup, name, SKU, Status,
+          ["Gateway IP"] = tostring(GatewayIP), P2S
+| order by subscriptionName, resourceGroup, name
+
+
+
+/*--------------------------------------------------------------------------------------------------
+  Service Health – 네트워크 관련 Active 이벤트
+--------------------------------------------------------------------------------------------------*/
+ServiceHealthResources
+| where type =~ "Microsoft.ResourceHealth/events"
+| extend eventType   = properties.EventType,
+         status      = properties.Status,
+         description = properties.Title,
+         startKST    = datetime_add('hour',9,todatetime(properties.ImpactStartTime)),
+         endKST      = datetime_add('hour',9,todatetime(properties.ImpactMitigationTime)),
+         service     = tostring(properties['Impact'][0]['ImpactedService']),
+         eventLevel  = properties.EventLevel
+| where status == "Active" and service contains "network"
+| extend startTime = format_datetime(startKST,"yy-MM-dd [HH:mm]"),
+         endTime   = format_datetime(endKST,"yy-MM-dd [HH:mm]")
+| project Level = tostring(eventLevel),
+         Type  = tostring(eventType),
+         Service = tostring(service),
+         description,
+         location,
+         startTime,
+         endTime
+| order by startTime desc
+
