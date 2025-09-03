@@ -1,0 +1,880 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_MPN-MINSUN",
+      "label": "mpn-minsun",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "grafana-azure-monitor-datasource",
+      "pluginName": "Azure Monitor"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.4.0"
+    },
+    {
+      "type": "datasource",
+      "id": "grafana-azure-monitor-datasource",
+      "name": "Azure Monitor",
+      "version": "11.3.1"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "totalAKSCount"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "전체"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "runningAKSCount"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "실행"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stoppedAKSCount"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "중지"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.containerservice/managedclusters\" // AKS 리소스 필터링\r\n| extend provisioningState = tostring(properties.provisioningState) // 상태 추출\r\n| extend deletionTime = todatetime(properties.deletionTimestamp) // 삭제 시간 추출\r\n| summarize \r\n    totalAKSCount = count(), // 총 AKS 수\r\n    runningAKSCount = countif(provisioningState == \"Succeeded\"), // 실행 중인 AKS 수\r\n    stoppedAKSCount = countif(provisioningState == \"Failed\" or provisioningState == \"Stopped\") // 중지된 AKS 수\r\n    // deletedAKSCount = countif(deletionTime > ago(24h)) // 24시간 내 삭제된 AKS 수"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "버전"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 366
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "지역"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 292
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "리소스그룹"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 355
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AKS"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 430
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 20,
+        "x": 4,
+        "y": 0
+      },
+      "id": 33,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.containerservice/managedclusters\"\r\n| extend kubernetesVersion = tostring(properties.kubernetesVersion)\r\n| join kind=leftouter (\r\n    ResourceContainers\r\n    | where type == \"microsoft.resources/subscriptions\"\r\n    | project subscriptionId, subscriptionName=name\r\n) on subscriptionId\r\n| project id, name, location, resourceGroup, subscriptionName, kubernetesVersion\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        },
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.containerservice/managedclusters\"\r\n| project id, name, location, resourceGroup, subscriptionId"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "hide": true,
+          "queryType": "Azure Resource Graph",
+          "refId": "C",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "AKS 목록",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "id": true,
+              "location": false,
+              "provisioningState": true,
+              "resourceGroup": false,
+              "size": true,
+              "subscription": true,
+              "subscriptionId": false
+            },
+            "includeByName": {},
+            "indexByName": {
+              "id": 5,
+              "kubernetesVersion": 3,
+              "location": 2,
+              "name": 0,
+              "resourceGroup": 1,
+              "subscriptionName": 4
+            },
+            "renameByName": {
+              "autoScalingEnabled": "자동 확장",
+              "cluster": "클러스터",
+              "clusterName": "이름",
+              "clusterVersion": "버전",
+              "instanceCount": "현재 노드 ",
+              "kubernetesVersion": "버전",
+              "location": "지역",
+              "maxNodeCount": "최대 노드",
+              "minNodeCount": "최소 노드",
+              "name": "AKS",
+              "nodeName": "노드",
+              "nodePoolMode": "노드 모드",
+              "osType": "OS",
+              "poolName": "노드 풀",
+              "powerState": "상태",
+              "provisioningState": "",
+              "resourceGroup": "리소스그룹",
+              "size": "사이즈",
+              "subscription": "구독",
+              "subscriptionName": "구독",
+              "vmSize": "Sku"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cluster"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 132
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "subscription"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 335
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "size"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 183
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "구독"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 328
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "클러스터"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 185
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "리소스그룹"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 161
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "지역"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 196
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "사이즈"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 214
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "poolName"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 189
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "노드 풀"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 193
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "노드 수"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 121
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "minNodeCount"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 161
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "최소 노드 수"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 144
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "현재 노드"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 129
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "현재 노드 "
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 196
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type == \"microsoft.containerservice/managedclusters\"  // AKS 클러스터 리소스\r\n| extend clusterName = tostring(name),\r\n         resourceGroup = tostring(resourceGroup),\r\n         location = tostring(location),\r\n         clusterVersion = tostring(properties.kubernetesVersion),\r\n         provisioningState = tostring(properties.provisioningState),\r\n         powerState = tostring(properties.powerState.code),\r\n         agentPools = properties.agentPoolProfiles\r\n| mv-expand agentPools  // 여러 노드 풀 정보를 개별 행으로 확장\r\n| where agentPools['count'] > 0  // count 값이 0인 에이전트 풀 필터링\r\n| extend \r\n    nodeName = tostring(agentPools.name),  // 노드 풀 이름\r\n    instanceCount = tostring(agentPools['count']),  // 노드 수\r\n    minNodeCount = iif(agentPools.enableAutoScaling == false, \"N/A\", tostring(agentPools.minCount)),  // 최소 노드 수\r\n    maxNodeCount = iif(agentPools.enableAutoScaling == false, \"N/A\", tostring(agentPools.maxCount)),  // 최대 노드 수\r\n    autoScalingEnabled = tostring(agentPools.enableAutoScaling),  // 자동 확장 여부\r\n    vmSize = tostring(agentPools.vmSize),  // VM 크기\r\n    osType = tostring(agentPools.osType),  // OS 유형\r\n    nodePoolMode = tostring(agentPools.mode)  // 노드 풀 모드 (User/System 등)\r\n| project \r\n    clusterName, \r\n    resourceGroup, \r\n    location, \r\n    clusterVersion,  \r\n    provisioningState,\r\n    powerState, \r\n    nodeName, \r\n    instanceCount, \r\n    minNodeCount, \r\n    maxNodeCount, \r\n    autoScalingEnabled, \r\n    vmSize, \r\n    osType, \r\n    nodePoolMode\r\n| order by clusterName, resourceGroup, location, nodeName\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        },
+        {
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type == \"microsoft.containerservice/managedclusters\"  // AKS 클러스터 리소스\r\n| extend properties.agentPoolProfiles\r\n| project subscriptionId = tostring(subscriptionId), \r\n          resourceGroup = tostring(resourceGroup), \r\n          location = tostring(location), \r\n          clusterName = tostring(name), \r\n          pool = properties.agentPoolProfiles  // 리소스 그룹과 지역 추가\r\n| mv-expand pool  // 여러 에이전트 풀 정보 확장\r\n| where pool['count'] > 0  // count 값이 0인 에이전트 풀 필터링\r\n| extend \r\n    poolName = tostring(pool.name),  // 노드 풀 이름\r\n    instanceCount = tostring(pool['count']),  // 노드 수\r\n    minNodeCount = iif(pool.enableAutoScaling == false, \"N/A\", tostring(pool.minCount)),  // 최소 노드 수\r\n    maxNodeCount = iif(pool.enableAutoScaling == false, \"N/A\", tostring(pool.maxCount)),  // 최대 노드 수\r\n    autoScalingEnabled = tostring(pool.enableAutoScaling)  // 자동 확장 여부 추가\r\n| project \r\n    cluster = clusterName, \r\n    resourceGroup, \r\n    location, \r\n    poolName, \r\n    instanceCount, \r\n    minNodeCount, \r\n    maxNodeCount, \r\n    autoScalingEnabled\r\n| order by cluster, resourceGroup, location, poolName\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "hide": true,
+          "queryType": "Azure Resource Graph",
+          "refId": "B",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "노드풀 상세 정보",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "autoScalingEnabled": false,
+              "location": true,
+              "provisioningState": true,
+              "resourceGroup": true,
+              "size": true,
+              "subscription": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "autoScalingEnabled": 8,
+              "clusterName": 0,
+              "clusterVersion": 6,
+              "instanceCount": 7,
+              "location": 12,
+              "maxNodeCount": 10,
+              "minNodeCount": 9,
+              "nodeName": 4,
+              "nodePoolMode": 2,
+              "osType": 3,
+              "powerState": 1,
+              "provisioningState": 13,
+              "resourceGroup": 11,
+              "vmSize": 5
+            },
+            "renameByName": {
+              "autoScalingEnabled": "자동 확장",
+              "cluster": "클러스터",
+              "clusterName": "이름",
+              "clusterVersion": "버전",
+              "instanceCount": "현재 노드 ",
+              "location": "지역",
+              "maxNodeCount": "최대 노드",
+              "minNodeCount": "최소 노드",
+              "nodeName": "노드",
+              "nodePoolMode": "노드 모드",
+              "osType": "OS",
+              "poolName": "노드 풀",
+              "powerState": "상태",
+              "provisioningState": "",
+              "resourceGroup": "리소스그룹",
+              "size": "사이즈",
+              "subscription": "구독",
+              "vmSize": "Sku"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "작업 유형"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 127
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "작업 시간"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 198
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AKS 이름"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 209
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "리소스 그룹"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 282
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "id": 32,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resourcechanges\r\n| where properties.targetResourceType =~ \"Microsoft.ContainerService/managedClusters\"\r\n| extend resourceIdParts = split(properties.targetResourceId, \"/\")  // 슬래시(/)로 리소스 ID 분리\r\n| extend aksName = tostring(resourceIdParts[8])  // AKS 이름 추출\r\n| extend resourceGroup = tostring(resourceIdParts[4])  // 리소스 그룹 추출\r\n| extend subscriptionId = tostring(resourceIdParts[2])  // 구독 ID 추출\r\n| extend changeTime = todatetime(properties.changeAttributes.timestamp)  // 작업 시간\r\n| where changeTime > ago(24h)  // 최근 24시간 내 변경 사항 필터링\r\n| extend operation = case(\r\n    properties.changeAttributes.operation contains \"/write\", \"Create/Update\",\r\n    properties.changeAttributes.operation contains \"/delete/action\", \"Delete\",\r\n    properties.changeAttributes.operation contains \"/stop/action\", \"Stop\",\r\n    properties.changeAttributes.operation contains \"/start/action\", \"Start\",\r\n    \"Unknown\"\r\n)\r\n| where operation != \"Unknown\"  // Unknown 작업 유형 제외\r\n| join kind=leftouter (\r\n    resourcecontainers\r\n    | where type =~ \"microsoft.resources/subscriptions\"\r\n    | project subscriptionName = name, subscriptionId\r\n) on subscriptionId\r\n| project \r\n    aksName,  // AKS 이름\r\n    resourceGroup,  // 리소스 그룹\r\n    subscriptionName = coalesce(subscriptionName, \"Unknown\"),  // 구독 이름\r\n    operation,  // 작업 유형\r\n    changedBy = coalesce(tostring(properties.changeAttributes.changedBy), \"Unknown\"),  // 작업 수행자\r\n    changeTime  // 작업 시간\r\n| order by changeTime desc\r\n| limit 10\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "AKS 활동 로그",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {
+              "aksName": 1,
+              "changeTime": 0,
+              "changedBy": 4,
+              "operation": 3,
+              "resourceGroup": 2,
+              "subscriptionName": 5
+            },
+            "renameByName": {
+              "aksName": "AKS 이름",
+              "changeTime": "작업 시간",
+              "changedBy": "사용자",
+              "operation": "작업 유형",
+              "properties_changeAttributes_changedBy": "사용자",
+              "resourceGroup": "리소스 그룹",
+              "subscriptionName": "구독 이름"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "grafana-azure-monitor-datasource",
+          "uid": "${DS_MPN-MINSUN}"
+        },
+        "definition": "",
+        "includeAll": true,
+        "label": "구독 ",
+        "multi": true,
+        "name": "subscriptions",
+        "options": [],
+        "query": {
+          "azureLogAnalytics": {
+            "query": "",
+            "resources": []
+          },
+          "queryType": "Azure Subscriptions",
+          "refId": "A"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "6. AKS",
+  "uid": "ee767t0jqqkg0f",
+  "version": 180,
+  "weekStart": ""
+}

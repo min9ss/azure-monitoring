@@ -1,0 +1,1788 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 3,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "region"
+            },
+            "properties": []
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 28,
+      "options": {
+        "basemap": {
+          "config": {
+            "server": "streets",
+            "showLabels": true,
+            "theme": "auto"
+          },
+          "name": "Layer 0",
+          "type": "carto"
+        },
+        "controls": {
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showDebug": false,
+          "showMeasure": false,
+          "showScale": false,
+          "showZoom": true
+        },
+        "layers": [
+          {
+            "config": {
+              "showLegend": false,
+              "style": {
+                "color": {
+                  "fixed": "dark-green"
+                },
+                "opacity": 0.4,
+                "rotation": {
+                  "fixed": 0,
+                  "max": 360,
+                  "min": -360,
+                  "mode": "mod"
+                },
+                "size": {
+                  "field": "total",
+                  "fixed": 5,
+                  "max": 20,
+                  "min": 5
+                },
+                "symbol": {
+                  "fixed": "img/icons/marker/circle.svg",
+                  "mode": "fixed"
+                },
+                "text": {
+                  "field": "region",
+                  "fixed": "",
+                  "mode": "fixed"
+                },
+                "textConfig": {
+                  "fontSize": 12,
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "textAlign": "center",
+                  "textBaseline": "middle"
+                }
+              }
+            },
+            "filterData": {
+              "id": "byRefId",
+              "options": "A"
+            },
+            "location": {
+              "latitude": "latitude",
+              "longitude": "longitude",
+              "mode": "coords"
+            },
+            "name": "Resource",
+            "tooltip": true,
+            "type": "markers"
+          }
+        ],
+        "tooltip": {
+          "mode": "details"
+        },
+        "view": {
+          "allLayers": true,
+          "id": "fit",
+          "lastOnly": false,
+          "lat": 0,
+          "layer": "Layer 1",
+          "lon": 0,
+          "shared": false,
+          "zoom": 15
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type =~ \"Microsoft.Compute/virtualMachines\" // VM 리소스만 필터링\r\n| summarize total = count() by location\r\n| extend region = case(\r\n    location =~ \"eastasia\", \"East Asia\",\r\n    location =~ \"southeastasia\", \"Southeast Asia\",\r\n    location =~ \"centralus\", \"Central US\",\r\n    location =~ \"eastus\", \"East US\",\r\n    location =~ \"eastus2\", \"East US 2\",\r\n    location =~ \"westus\", \"West US\",\r\n    location =~ \"westus2\", \"West US 2\",\r\n    location =~ \"westcentralus\", \"West Central US\",\r\n    location =~ \"northcentralus\", \"North Central US\",\r\n    location =~ \"southcentralus\", \"South Central US\",\r\n    location =~ \"northeurope\", \"North Europe\",\r\n    location =~ \"westeurope\", \"West Europe\",\r\n    location =~ \"australiaeast\", \"Australia East\",\r\n    location =~ \"australiasoutheast\", \"Australia Southeast\",\r\n    location =~ \"canadacentral\", \"Canada Central\",\r\n    location =~ \"canadaeast\", \"Canada East\",\r\n    location =~ \"uksouth\", \"UK South\",\r\n    location =~ \"ukwest\", \"UK West\",\r\n    location =~ \"koreacentral\", \"Korea Central\",\r\n    location =~ \"koreasouth\", \"Korea South\",\r\n    location =~ \"japaneast\", \"Japan East\", // 추가된 지역\r\n    \"N/A\")\r\n| where region != \"N/A\" // N/A 값을 제외\r\n| extend latitude = case(\r\n    location =~ \"eastasia\", 22.267,        // East Asia\r\n    location =~ \"southeastasia\", 1.283,    // Southeast Asia\r\n    location =~ \"centralus\", 41.5908,     // Central US\r\n    location =~ \"eastus\", 37.3719,        // East US\r\n    location =~ \"eastus2\", 36.6681,       // East US 2\r\n    location =~ \"westus\", 37.783,         // West US\r\n    location =~ \"westus2\", 47.233,        // West US 2\r\n    location =~ \"westcentralus\", 40.890,  // West Central US\r\n    location =~ \"northcentralus\", 41.8819,// North Central US\r\n    location =~ \"southcentralus\", 29.4167,// South Central US\r\n    location =~ \"northeurope\", 53.3478,   // North Europe\r\n    location =~ \"westeurope\", 52.3667,    // West Europe\r\n    location =~ \"australiaeast\", -33.86,   // Australia East\r\n    location =~ \"australiasoutheast\", -37.8136, // Australia Southeast\r\n    location =~ \"canadacentral\", 43.653,  // Canada Central\r\n    location =~ \"canadaeast\", 46.817,     // Canada East\r\n    location =~ \"uksouth\", 50.941,        // UK South\r\n    location =~ \"ukwest\", 53.427,         // UK West\r\n    location =~ \"koreacentral\", 37.5665,  // Korea Central\r\n    location =~ \"koreasouth\", 35.1796,    // Korea South\r\n    location =~ \"japaneast\", 35.6895,     // 추가된 지역의 위도\r\n    0.0)                                   // Default value if location not matched\r\n| extend longitude = case(\r\n    location =~ \"eastasia\", 114.188,      // East Asia\r\n    location =~ \"southeastasia\", 103.833,  // Southeast Asia\r\n    location =~ \"centralus\", -93.6208,    // Central US\r\n    location =~ \"eastus\", -79.8164,       // East US\r\n    location =~ \"eastus2\", -78.3889,      // East US 2\r\n    location =~ \"westus\", -122.417,       // West US\r\n    location =~ \"westus2\", -119.852,      // West US 2\r\n    location =~ \"westcentralus\", -110.234, // West Central US\r\n    location =~ \"northcentralus\", -87.6278,// North Central US\r\n    location =~ \"southcentralus\", -98.5,  // South Central US\r\n    location =~ \"northeurope\", -6.2597,   // North Europe\r\n    location =~ \"westeurope\", 4.9,        // West Europe\r\n    location =~ \"australiaeast\", 151.2094, // Australia East\r\n    location =~ \"australiasoutheast\", 144.9631, // Australia Southeast\r\n    location =~ \"canadacentral\", -79.383, // Canada Central\r\n    location =~ \"canadaeast\", -71.217,    // Canada East\r\n    location =~ \"uksouth\", -0.799,        // UK South\r\n    location =~ \"ukwest\", -3.084,         // UK West\r\n    location =~ \"koreacentral\", 126.9780, // Korea Central\r\n    location =~ \"koreasouth\", 129.0756,   // Korea South\r\n    location =~ \"japaneast\", 139.6917,    // 추가된 지역의 경도\r\n    0.0)                                    // Default value if location not matched\r\n| project total, region, latitude, longitude\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "eeny2dh71pdz4e"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        },
+        {
+          "azureResourceGraph": {
+            "query": ""
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "eeny2dh71pdz4e"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "B",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "지역별 VM",
+      "type": "geomap"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "totalVMs"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "전체"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "text"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "runningCount"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "실행"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "text"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "deallocatedCount"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "중지"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green"
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 2,
+        "x": 6,
+        "y": 0
+      },
+      "id": 24,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "auto",
+        "wideLayout": false
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.compute/virtualmachines\"\r\n| summarize totalVMs = count()"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "eeny2dh71pdz4e"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "B",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        },
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.compute/virtualmachines\"\r\n| project vmState = tostring(properties.extended.instanceView.powerState.displayStatus)\r\n| where vmState contains \"VM running\"\r\n| summarize runningCount = count()\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "eeny2dh71pdz4e"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        },
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.compute/virtualmachines\"\r\n| extend vmState = tostring(properties.extended.instanceView.powerState.displayStatus)\r\n| project vmState\r\n| where vmState contains \"VM deallocated\"\r\n| summarize deallocatedCount = count()"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "eeny2dh71pdz4e"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "C",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "subscription"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 136
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "name"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "powerState"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "VNet"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "상태"
+            },
+            "properties": [
+              {
+                "id": "custom.filterable",
+                "value": true
+              },
+              {
+                "id": "custom.width",
+                "value": 145
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "리소스그룹"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 201
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "구독"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "지역"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 143
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "VM이름"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 105
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "공용 IP"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 220
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "사설 IP"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 191
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "sku"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 270
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "VMCount"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "subscriptionName"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PowerStates"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "OS"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 152
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "VM"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 321
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 16,
+        "x": 8,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resources\r\n| where (type =~ \"microsoft.hybridcompute/machines\" and kind =~ \"AVS\") or type =~ \"microsoft.compute/virtualmachines\"\r\n| mvexpand nic=properties.networkProfile.networkInterfaces\r\n| project\r\n    subscriptionId,\r\n    name,\r\n    powerState = coalesce(properties.powerState, properties.status.powerState, tostring(split(tolower(properties.extended.instanceView.powerState.code), \"powerstate/\")[1])),\r\n    resourceGroup,\r\n    location,\r\n    vmSize = coalesce(tostring(properties.hardwareProfile.vmSize), '-'),\r\n    os = case(\r\n        properties.storageProfile.osDisk.osType =~ 'Windows' or properties.osProfile.osType =~ 'Windows', 'Windows',\r\n        properties.storageProfile.osDisk.osType =~ 'Linux' or properties.osProfile.osType =~ 'Linux', 'Linux',\r\n        '-'\r\n    ),\r\n    nicId = tostring(tolower(nic.id))\r\n| join kind=leftouter hint.strategy=shuffle(\r\n    resources\r\n    | where type =~ 'Microsoft.Network/networkInterfaces' \r\n    | extend ipConfigsCount=array_length(properties.ipConfigurations) \r\n    | mvexpand ipconfig=properties.ipConfigurations limit 400\r\n    | parse kind=regex tostring(ipconfig.properties.subnet.id) with '/virtualNetworks/' virtualNetwork '/subnets/' subnet \r\n    | project\r\n        nicId=tolower(id),\r\n        publicIpId=tostring(ipconfig.properties.publicIPAddress.id),\r\n        privateIPAddress=tostring(ipconfig.properties.privateIPAddress),\r\n        virtualNetwork) on nicId\r\n| join kind=leftouter hint.strategy=shuffle (\r\n    resources\r\n    | where type =~ 'microsoft.network/publicipaddresses' \r\n    | project\r\n        publicIpId=tostring(id),\r\n        publicIpAddress=tostring(properties.ipAddress)) on publicIpId\r\n| project-away nicId,nicId1,publicIpId,publicIpId1\r\n| join kind=leftouter hint.strategy=shuffle(\r\n    resourcecontainers\r\n    | where type =~ \"microsoft.resources/subscriptions\"\r\n    | project subscriptionName = name, subscriptionId) on subscriptionId \r\n| project-away subscriptionId, subscriptionId1\r\n| project \r\n    subscriptionName,\r\n    name,\r\n    resourceGroup,\r\n    location,\r\n    powerState,\r\n    virtualNetwork,\r\n    publicIpAddress,\r\n    privateIPAddress,\r\n    vmSize,\r\n    os\r\n| order by subscriptionName, resourceGroup, name\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "eeny2dh71pdz4e"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "VM 리스트",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "subscriptionName": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "location": 8,
+              "name": 0,
+              "os": 6,
+              "powerState": 1,
+              "privateIPAddress": 4,
+              "publicIpAddress": 3,
+              "resourceGroup": 7,
+              "subscriptionName": 9,
+              "virtualNetwork": 2,
+              "vmSize": 5
+            },
+            "renameByName": {
+              "location": "지역",
+              "name": "VM",
+              "os": "OS",
+              "powerState": "상태",
+              "privateIPAddress": "사설 IP",
+              "publicIpAddress": "공용 IP",
+              "resourceGroup": "리소스그룹",
+              "subscription": "구독",
+              "subscriptionName": "구독",
+              "virtualNetwork": "VNet",
+              "vmSize": "sku"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "totalDisks"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "총 Disk 수"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Disk"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "사용 Disk"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "text"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unattachedDisks"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "text"
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 13
+      },
+      "id": 27,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type =~ \"Microsoft.Compute/disks\" // 디스크 리소스만 필터링\r\n| extend diskState = tostring(properties.diskState) // 디스크 상태 추출\r\n| summarize \r\n    unattachedDisks = countif(diskState == \"Unattached\"), // Unattached 상태 디스크 수\r\n    otherDisks = countif(diskState in (\"Attached\", \"Reserved\")) // Attached 또는 Reserved 상태 디스크 수\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "eeny2dh71pdz4e"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {
+              "otherDisks": 0,
+              "unattachedDisks": 1
+            },
+            "renameByName": {
+              "otherDisks": "Disk",
+              "unattachedDisks": "미사용 Disk"
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "create"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "생성"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "delete"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "삭제"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 3,
+        "y": 13
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resourcechanges\r\n| where type == 'microsoft.resources/changes'\r\n| extend timestamp = todatetime(properties.changeAttributes.timestamp),\r\n    change_type = properties.changeType,\r\n    resource = tostring(split(properties.targetResourceType, \"/\")[array_length(split(properties.targetResourceType, \"/\")) -1])\r\n| where timestamp >= ago(24h) and change_type == \"Create\"\r\n| where resource == \"virtualmachines\"  // VM만 필터링\r\n| summarize create = count()\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "eeny2dh71pdz4e"
+          },
+          "hide": false,
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        },
+        {
+          "azureResourceGraph": {
+            "query": "resourcechanges\r\n| where type == 'microsoft.resources/changes'\r\n| extend timestamp = todatetime(properties.changeAttributes.timestamp),\r\n    change_type = properties.changeType,\r\n    resource = tostring(split(properties.targetResourceType, \"/\")[array_length(split(properties.targetResourceType, \"/\")) -1])\r\n| where timestamp >= ago(24h) and change_type == \"Delete\"\r\n| where resource == \"virtualmachines\"  // VM만 필터링\r\n| summarize delete = count()\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "eeny2dh71pdz4e"
+          },
+          "hide": false,
+          "queryType": "Azure Resource Graph",
+          "refId": "B",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "totalIPCount"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "VM PIP 수"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 6,
+        "y": 13
+      },
+      "id": 22,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type contains 'publicIPAddresses' and isnotempty(properties.ipConfiguration.id) // Public IP가 연결된 경우\r\n| extend associatedResourceId = tostring(properties.ipConfiguration.id) // 연결된 리소스 ID 추출\r\n| where associatedResourceId contains \"Microsoft.Network/networkInterfaces\" // 네트워크 인터페이스가 포함된 리소스만 필터링\r\n| summarize totalIPCount = count()\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "eeny2dh71pdz4e"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "리소스 그룹"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 148
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "상태"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 119
+              },
+              {
+                "id": "mappings",
+                "value": []
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "VMSS 이름"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 175
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "지역"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 184
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "vmSize"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 78
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "instanceCount"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "skuTier"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 101
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "capacity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 83
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "osDiskStorageAccountType"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 207
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "크기"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 185
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "인스턴스 수"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 92
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "단일 배치 그룹 여부"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 149
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "오케스트레이션 유형"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 167
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "계층"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 189
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "오케스트레이션"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 205
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "단일 배치 그룹"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 202
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "업그레이드 정책"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 221
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "인스턴스"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 154
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 16,
+        "x": 8,
+        "y": 13
+      },
+      "id": 20,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type == \"microsoft.compute/virtualmachinescalesets\"\r\n| where not(name has \"aks\" or name has \"akswin\") // 이름에 \"aks\" 또는 \"akswin\" 포함 제외\r\n| where not(resourceGroup startswith \"MC_\") // MC_로 시작하는 리소스 그룹 제외\r\n| where not(resourceGroup has \"aks\" or resourceGroup has \"akswin\" or resourceGroup has \"aks-node-rg\") // 추가 필터링\r\n| project \r\n    scaleSetName = tostring(name), \r\n    resourceGroup = tostring(resourceGroup), \r\n    location = tostring(location), \r\n    skuName = tostring(sku.name),\r\n    skuTier = tostring(sku.tier),\r\n    capacity = toint(sku.capacity),\r\n    orchestrationMode = tostring(properties.orchestrationMode),\r\n    singlePlacementGroup = tostring(properties.singlePlacementGroup),\r\n    upgradePolicy = tostring(properties.upgradePolicy.mode),\r\n    timeCreated = todatetime(properties.timeCreated)\r\n| limit 100\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "eeny2dh71pdz4e"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "VMSS 리스트",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "timeCreated": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "capacity": 3,
+              "location": 8,
+              "orchestrationMode": 4,
+              "resourceGroup": 7,
+              "scaleSetName": 0,
+              "singlePlacementGroup": 5,
+              "skuName": 1,
+              "skuTier": 2,
+              "timeCreated": 9,
+              "upgradePolicy": 6
+            },
+            "renameByName": {
+              "capacity": "인스턴스",
+              "location": "지역",
+              "orchestrationMode": "오케스트레이션",
+              "provisioningState": "상태",
+              "resourceGroup": "리소스 그룹",
+              "scaleSetName": "VMSS 이름",
+              "singlePlacementGroup": "단일 배치 그룹",
+              "skuName": "크기",
+              "skuTier": "계층",
+              "timeCreated": "생성 시간",
+              "upgradePolicy": "업그레이드 정책"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "작업 시간"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 265
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "리소스 그룹"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 218
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "사용자"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 439
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "작업 유형"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 124
+              },
+              {
+                "id": "custom.filterable",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "VM 이름"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 318
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "VM"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 186
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "작업시간"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 196
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "리소스그룹 "
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 17
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resourcechanges\r\n| where type == 'microsoft.resources/changes'\r\n| extend timestamp = todatetime(properties.changeAttributes.timestamp),\r\n    change_type = properties.changeType,\r\n    changed_by = properties.changeAttributes.changedBy,\r\n    resource = tostring(split(properties.targetResourceType, \"/\")[array_length(split(properties.targetResourceType, \"/\")) -1]),\r\n    resource_name = tostring(split(properties.targetResourceId, \"/\")[array_length(split(properties.targetResourceId, \"/\")) - 1]),\r\n    resource_group = tostring(extract(@\"resourceGroups\\/([^\\/]+)\", 1, tostring(properties.targetResourceId)))  // `tostring()` 적용\r\n| where resource == \"virtualmachines\"  // VM만 필터링\r\n| where timestamp >= ago(24h) and change_type != \"Update\"\r\n| project format_datetime(timestamp, 'yyyy/MM/dd HH:mm:ss'), tostring(resource), tostring(resource_group), tostring(resource_name), tostring(changed_by), tostring(change_type)\r\n| order by timestamp desc\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "eeny2dh71pdz4e"
+          },
+          "hide": false,
+          "queryType": "Azure Resource Graph",
+          "refId": "C",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "VM 활동 로그",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "ActionType": false,
+              "correlationId": true,
+              "resource": true,
+              "resource_group": true,
+              "subscription": false
+            },
+            "includeByName": {},
+            "indexByName": {
+              "change_type": 2,
+              "changed_by": 4,
+              "resource": 5,
+              "resource_group": 3,
+              "resource_name": 1,
+              "timestamp": 0
+            },
+            "renameByName": {
+              "ActionTime": "작업 시간",
+              "ActionType": "작업 유형",
+              "Time": "",
+              "User": "사용자",
+              "VmName": "VM 이름",
+              "change_type": "작업 유형",
+              "changed_by": "사용자",
+              "correlationId": "상관 ID",
+              "name": "VM",
+              "resource": "",
+              "resourceGroup": "리소스 그룹",
+              "resource_group": "리소스그룹 ",
+              "resource_name": "VM",
+              "subscription": "구독",
+              "subscriptionId": "구독",
+              "subscriptionName": "구독",
+              "timestamp": "작업시간"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.filterable",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 16,
+        "x": 8,
+        "y": 17
+      },
+      "id": 29,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureMonitor": {
+            "allowedTimeGrainsMs": [],
+            "timeGrain": "auto"
+          },
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type =~ \"Microsoft.Compute/disks\"\r\n| parse kind=regex managedBy with \"/virtualMachines/\" vmName\r\n| join kind=leftouter hint.strategy=shuffle(\r\n    resourcecontainers\r\n    | where type =~ \"microsoft.resources/subscriptions\"\r\n    | project subscriptionName = tostring(name), subscriptionId = tostring(subscriptionId)\r\n) on subscriptionId\r\n| project-away subscriptionId, subscriptionId1\r\n| extend \r\n    finalSku = iif(isnotempty(sku.name), tostring(sku.name),\r\n               iif(isnotempty(properties.sku.name), tostring(properties.sku.name),\r\n               iif(isnotempty(properties.accountType), tostring(properties.accountType), \"\")))\r\n| extend \r\n    storageType = case(\r\n        finalSku =~ \"Premium_LRS\", \"Premium SSD\",\r\n        finalSku =~ \"PremiumV2_LRS\", \"Premium SSD v2\",\r\n        finalSku =~ \"StandardSSD_LRS\", \"Standard SSD\",\r\n        finalSku =~ \"Standard_LRS\", \"Standard HDD\",\r\n        finalSku =~ \"UltraSSD_LRS\", \"Ultra Disk\",\r\n        finalSku =~ \"Standard_ZRS\", \"Standard ZRS HDD\",\r\n        finalSku =~ \"Premium_ZRS\", \"Premium ZRS SSD\",\r\n        isnotempty(finalSku), finalSku,  // 디버깅용 fallback\r\n        \"Unknown\"\r\n    )\r\n| project \r\n    name = tostring(name),\r\n    vmName = coalesce(tostring(vmName), \"Not Attached\"),\r\n    status = tostring(properties.diskState),\r\n    diskSizeGB = toint(properties.diskSizeGB),\r\n    storageType,\r\n    location = tostring(location),\r\n    resourceGroup = tostring(resourceGroup),\r\n    subscription = tostring(subscriptionName)\r\n| order by name asc\r\n"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "5d98fd4c-bf45-4fe6-a554-68c369997297",
+            "bcab936a-2388-454c-b309-1aca8620a15d",
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b",
+            "ea01e5db-cabf-403f-9cc2-a6abf0d25f7b",
+            "5fbbb1e7-7f66-4904-ba32-dbf0a40f224f"
+          ]
+        }
+      ],
+      "title": "Disk",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "location": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "diskSizeGB": 3,
+              "location": 5,
+              "name": 0,
+              "resourceGroup": 6,
+              "status": 1,
+              "storageType": 4,
+              "subscription": 7,
+              "vmName": 2
+            },
+            "renameByName": {
+              "diskSizeGB": "크기 (GB)",
+              "location": "지역",
+              "name": "Disk",
+              "resourceGroup": "리소스그룹",
+              "status": "상태",
+              "storageType": "SKU",
+              "subscription": "구독",
+              "vmName": "연결된 VM"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 41,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-azure-monitor-datasource",
+          "uid": "eeny2dh71pdz4e"
+        },
+        "definition": "",
+        "includeAll": true,
+        "label": "구독",
+        "multi": true,
+        "name": "subscriptions",
+        "options": [],
+        "query": {
+          "azureLogAnalytics": {
+            "query": "",
+            "resources": []
+          },
+          "queryType": "Azure Subscriptions",
+          "refId": "A"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-azure-monitor-datasource",
+          "uid": "eeny2dh71pdz4e"
+        },
+        "definition": "",
+        "description": "",
+        "hide": 2,
+        "includeAll": true,
+        "label": "resourceGroup",
+        "multi": true,
+        "name": "resourceGroup",
+        "options": [],
+        "query": {
+          "azureLogAnalytics": {
+            "query": "",
+            "resources": []
+          },
+          "queryType": "Azure Resource Groups",
+          "refId": "A",
+          "subscription": "$subscriptions"
+        },
+        "refresh": 1,
+        "regex": "Resources\n| where type == \"microsoft.compute/virtualmachinescalesets\"\n| where name == \"$vmss\"  // 특정 VMSS 이름\n| project resourceGroup",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "aks-agentpool-20523571-vmss",
+          "value": "aks-agentpool-20523571-vmss"
+        },
+        "datasource": {
+          "type": "grafana-azure-monitor-datasource",
+          "uid": "eeny2dh71pdz4e"
+        },
+        "definition": "",
+        "hide": 2,
+        "name": "virtualmachinescalesets",
+        "options": [],
+        "query": {
+          "azureLogAnalytics": {
+            "query": "",
+            "resources": []
+          },
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.compute/virtualmachinescalesets\"\r\n| project name\r\n"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "bcab936a-2388-454c-b309-1aca8620a15d",
+          "value": "bcab936a-2388-454c-b309-1aca8620a15d"
+        },
+        "datasource": {
+          "type": "grafana-azure-monitor-datasource",
+          "uid": "eeny2dh71pdz4e"
+        },
+        "definition": "",
+        "hide": 2,
+        "name": "SubscriptionId",
+        "options": [],
+        "query": {
+          "azureLogAnalytics": {
+            "query": "",
+            "resources": []
+          },
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.compute/virtualmachinescalesets\"  // 올바른 VMSS 타입\r\n| where name == \"$virtualmachinescalesets\"  // 특정 VMSS 이름 필터링\r\n| project subscriptionId\r\n| join kind=inner (\r\n    resourcecontainers\r\n    | where type == \"microsoft.resources/subscriptions\"  // 구독 정보 가져오기\r\n    | project subscriptionId, name\r\n) on subscriptionId\r\n| project subscriptionId, name  // 구독 ID와 이름 출력\r\n"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "VM",
+  "uid": "fe76be54f41kwf",
+  "version": 9
+}

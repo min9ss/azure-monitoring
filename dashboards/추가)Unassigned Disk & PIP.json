@@ -1,0 +1,1002 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 7,
+  "links": [],
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 11,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: center; align-items: center; height: 100%; font-size: 30px;\">\n  디스크\n</div>\n",
+        "mode": "html"
+      },
+      "pluginVersion": "12.0.1",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-blue"
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 0,
+        "y": 2
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureMonitor": {
+            "allowedTimeGrainsMs": [],
+            "timeGrain": "auto"
+          },
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type =~ \"Microsoft.Compute/disks\"\r\n| extend diskState = tostring(properties.diskState)\r\n| summarize totalDisks = count(),\r\n            attachedDisks = countif(diskState != \"Unattached\"),\r\n            unattachedDisks = countif(diskState == \"Unattached\")"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscription"
+          ]
+        }
+      ],
+      "title": "",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "attachedDisks": "연결된 디스크",
+              "totalDisks": "총 개수",
+              "unattachedDisks": "미연결 디스크"
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "미연결 디스크"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 9,
+        "x": 6,
+        "y": 2
+      },
+      "id": 6,
+      "options": {
+        "cellHeight": "md",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureMonitor": {
+            "allowedTimeGrainsMs": [],
+            "timeGrain": "auto"
+          },
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type =~ \"Microsoft.Compute/disks\"\r\n| extend diskState = tostring(properties.diskState), subscriptionId = subscriptionId\r\n| join kind=leftouter (\r\n    resourcecontainers\r\n    | where type =~ \"microsoft.resources/subscriptions\"\r\n    | project subscriptionId, subscriptionName = name\r\n) on subscriptionId\r\n| summarize\r\n    totalDisks = count(),\r\n    attachedDisks = countif(diskState != \"Unattached\"),\r\n    unattachedDisks = countif(diskState == \"Unattached\")\r\n  by subscriptionName\r\n| order by totalDisks desc\r\n| sort by unattachedDisks"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "5d98fd4c-bf45-4fe6-a554-68c369997297",
+            "bcab936a-2388-454c-b309-1aca8620a15d",
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b",
+            "ea01e5db-cabf-403f-9cc2-a6abf0d25f7b",
+            "5fbbb1e7-7f66-4904-ba32-dbf0a40f224f"
+          ]
+        }
+      ],
+      "title": "구독별 디스크 개수",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "attachedDisks": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "attachedDisks": "연결된 디스크",
+              "subscriptionName": "구독",
+              "totalDisks": "총 개수",
+              "unattachedDisks": "미연결 디스크"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "filterable": false,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "미연결 디스크"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 9,
+        "x": 15,
+        "y": 2
+      },
+      "id": 7,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureMonitor": {
+            "allowedTimeGrainsMs": [],
+            "timeGrain": "auto"
+          },
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type =~ \"Microsoft.Compute/disks\"\r\n| extend\r\n    diskState = tostring(properties.diskState),\r\n    subscriptionId = subscriptionId,\r\n    resourceGroup = resourceGroup\r\n| join kind=leftouter (\r\n    resourcecontainers\r\n    | where type =~ \"microsoft.resources/subscriptions\"\r\n    | project subscriptionId, subscriptionName = name\r\n) on subscriptionId\r\n| summarize\r\n    totalDisks = count(),\r\n    attachedDisks = countif(diskState != \"Unattached\"),\r\n    unattachedDisks = countif(diskState == \"Unattached\")\r\n  by subscriptionName, resourceGroup\r\n| order by subscriptionName, resourceGroup\r\n| sort by unattachedDisks"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "5d98fd4c-bf45-4fe6-a554-68c369997297",
+            "bcab936a-2388-454c-b309-1aca8620a15d",
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b",
+            "ea01e5db-cabf-403f-9cc2-a6abf0d25f7b",
+            "5fbbb1e7-7f66-4904-ba32-dbf0a40f224f"
+          ]
+        }
+      ],
+      "title": "리소스 그룹별 디스크 개수",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "attachedDisks": true,
+              "subscriptionName": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "attachedDisks": "연결된 디스크",
+              "resourceGroup": "리소스 그룹",
+              "subscriptionName": "구독",
+              "totalDisks": "총 개수",
+              "unattachedDisks": "미연결 디스크"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "디스크 이름"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "md",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureMonitor": {
+            "allowedTimeGrainsMs": [],
+            "timeGrain": "auto"
+          },
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type =~ \"Microsoft.Compute/disks\"\r\n      and properties.diskState == \"Unattached\"\r\n| extend\r\n    diskName = name,\r\n    diskSizeGB = strcat(tostring(properties.diskSizeGB), \" GB\"),\r\n    diskSku = tostring(sku.name),\r\n    resourceGroup = resourceGroup,\r\n    subscriptionId = subscriptionId\r\n| join kind=leftouter hint.strategy=shuffle (\r\n    resourcecontainers\r\n    | where type =~ \"microsoft.resources/subscriptions\"\r\n    | project subscriptionId, subscriptionName = name\r\n) on subscriptionId\r\n| project\r\n    diskName,\r\n    diskSizeGB,\r\n    diskSku,\r\n    resourceGroup,\r\n    subscriptionName\r\n"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscription"
+          ]
+        }
+      ],
+      "title": "미연결 디스크 목록",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "diskName": "디스크 이름",
+              "diskSizeGB": "크기",
+              "diskSku": "SKU",
+              "resourceGroup": "리소스 그룹",
+              "subscriptionName": "구독"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 12,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: center; align-items: center; height: 100%; font-size: 30px;\">\n  공인IP\n</div>\n",
+        "mode": "html"
+      },
+      "pluginVersion": "12.0.1",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-blue"
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 0,
+        "y": 20
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureMonitor": {
+            "allowedTimeGrainsMs": [],
+            "timeGrain": "auto"
+          },
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type =~ \"Microsoft.Network/publicIPAddresses\"\r\n| extend\r\n    ipConfigId = tostring(properties.ipConfiguration.id),\r\n    natGatewayId = tostring(properties.natGateway.id)\r\n| extend\r\n    ipState = iif(isnotempty(ipConfigId) or isnotempty(natGatewayId), \"Assigned\", \"Unassigned\")\r\n| summarize\r\n    totalPIPs = count(),\r\n    assignedPIPs = countif(ipState == \"Assigned\"),\r\n    unassignedPIPs = countif(ipState == \"Unassigned\")\r\n"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscription"
+          ]
+        }
+      ],
+      "title": "",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "assignedPIPs": "사용된 PIP",
+              "attachedDisks": "연결된 디스크",
+              "totalDisks": "총 개수",
+              "totalPIPs": "총 개수",
+              "unassignedPIPs": "미사용 PIP",
+              "unattachedDisks": "미연결 디스크"
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "미사용 PIP"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 9,
+        "x": 6,
+        "y": 20
+      },
+      "id": 10,
+      "options": {
+        "cellHeight": "md",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureMonitor": {
+            "allowedTimeGrainsMs": [],
+            "timeGrain": "auto"
+          },
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type =~ \"Microsoft.Network/publicIPAddresses\"\r\n| extend\r\n    ipConfigId = tostring(properties.ipConfiguration.id),\r\n    natGatewayId = tostring(properties.natGateway.id)\r\n| extend\r\n    ipState = iif(isnotempty(ipConfigId) or isnotempty(natGatewayId), \"Assigned\", \"Unassigned\")\r\n| join kind=leftouter (\r\n    resourcecontainers\r\n    | where type == \"microsoft.resources/subscriptions\"\r\n    | project subscriptionId, subscriptionName = name\r\n) on subscriptionId\r\n| summarize\r\n    totalPIPs = count(),\r\n    assignedPIPs = countif(ipState == \"Assigned\"),\r\n    unassignedPIPs = countif(ipState == \"Unassigned\")\r\n  by subscriptionName\r\n| order by totalPIPs desc\r\n| sort by unassignedPIPs"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "5d98fd4c-bf45-4fe6-a554-68c369997297",
+            "bcab936a-2388-454c-b309-1aca8620a15d",
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b",
+            "ea01e5db-cabf-403f-9cc2-a6abf0d25f7b",
+            "5fbbb1e7-7f66-4904-ba32-dbf0a40f224f"
+          ]
+        }
+      ],
+      "title": "구독별 PIP 개수",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "assignedPIPs": true,
+              "attachedDisks": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "assignedPIPs": "사용된 PIP",
+              "attachedDisks": "연결된 디스크",
+              "subscriptionName": "구독",
+              "totalDisks": "총 개수",
+              "totalPIPs": "총 개수",
+              "unassignedPIPs": "미사용 PIP",
+              "unattachedDisks": "미연결 디스크"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "filterable": false,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "미사용 PIP"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 9,
+        "x": 15,
+        "y": 20
+      },
+      "id": 13,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureMonitor": {
+            "allowedTimeGrainsMs": [],
+            "timeGrain": "auto"
+          },
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type =~ \"Microsoft.Network/publicIPAddresses\"\r\n| extend\r\n    ipConfigId = tostring(properties.ipConfiguration.id),\r\n    natGatewayId = tostring(properties.natGateway.id),\r\n    subscriptionId = subscriptionId,\r\n    resourceGroup = resourceGroup\r\n| extend\r\n    ipState = iif(isnotempty(ipConfigId) or isnotempty(natGatewayId), \"Assigned\", \"Unassigned\")\r\n| join kind=leftouter (\r\n    resourcecontainers\r\n    | where type =~ \"microsoft.resources/subscriptions\"\r\n    | project subscriptionId, subscriptionName = name\r\n) on subscriptionId\r\n| summarize\r\n    totalPIPs = count(),\r\n    assignedPIPs = countif(ipState == \"Assigned\"),\r\n    unassignedPIPs = countif(ipState == \"Unassigned\")\r\n  by subscriptionName, resourceGroup\r\n| order by subscriptionName, resourceGroup\r\n| sort by unassignedPIPs\r\n"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "5d98fd4c-bf45-4fe6-a554-68c369997297",
+            "bcab936a-2388-454c-b309-1aca8620a15d",
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b",
+            "ea01e5db-cabf-403f-9cc2-a6abf0d25f7b",
+            "5fbbb1e7-7f66-4904-ba32-dbf0a40f224f"
+          ]
+        }
+      ],
+      "title": "리소스 그룹별 PIP 개수",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "assignedPIPs": true,
+              "attachedDisks": true,
+              "subscriptionName": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "assignedPIPs": "사용된 PIP",
+              "attachedDisks": "연결된 디스크",
+              "resourceGroup": "리소스 그룹",
+              "subscriptionName": "구독",
+              "totalDisks": "총 개수",
+              "totalPIPs": "총 개수",
+              "unassignedPIPs": "미사용 PIP",
+              "unattachedDisks": "미연결 디스크"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "eeny2dh71pdz4e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PIP 이름"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "id": 9,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "azureMonitor": {
+            "allowedTimeGrainsMs": [],
+            "timeGrain": "auto"
+          },
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type =~ \"Microsoft.Network/publicIPAddresses\"\r\n| extend\r\n    ipConfigId = tostring(properties.ipConfiguration.id),\r\n    natGatewayId = tostring(properties.natGateway.id)\r\n| extend\r\n    ipState = iif(isnotempty(ipConfigId) or isnotempty(natGatewayId), \"Assigned\", \"Unassigned\")\r\n| where ipState == \"Unassigned\"\r\n| join kind=leftouter (\r\n    resourcecontainers\r\n    | where type == \"microsoft.resources/subscriptions\"\r\n    | extend subscriptionId = tostring(split(id, \"/\")[2])\r\n    | project subscriptionId, subscriptionName = name\r\n) on subscriptionId\r\n| project\r\n    ipName = name,\r\n    ipAddress = tostring(properties.ipAddress), \r\n    resourceGroup, \r\n    subscriptionName\r\n| order by subscriptionName, resourceGroup"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscription"
+          ]
+        }
+      ],
+      "title": "미사용 PIP 목록",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "ipAddress": "IP 주소",
+              "ipName": "PIP 이름",
+              "name": "PIP 이름",
+              "resourceGroup": "리소스 그룹",
+              "subscriptionName": "구독"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 41,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allowCustomValue": true,
+        "current": {
+          "text": [
+            "Visual Studio Enterprise 구독 - MPN(minsun)"
+          ],
+          "value": [
+            "ea01e5db-cabf-403f-9cc2-a6abf0d25f7b"
+          ]
+        },
+        "definition": "",
+        "includeAll": true,
+        "label": "구독",
+        "multi": true,
+        "name": "subscription",
+        "options": [],
+        "query": {
+          "azureLogAnalytics": {
+            "query": "",
+            "resources": []
+          },
+          "queryType": "Azure Subscriptions",
+          "refId": "A"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Unassigned Disk & PIP",
+  "uid": "bb3bfede-fb25-4dec-982b-39b90821d246",
+  "version": 30
+}

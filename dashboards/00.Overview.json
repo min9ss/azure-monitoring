@@ -1,0 +1,2956 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "색상 및 패널 수정 250225",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 122,
+  "links": [],
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 52,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: flex-end; height: 100%; color: #000000; font-size: 20px; flex-direction: column; text-align: left; width: 100%;\">\n    <span style=\"font-weight: bold;\">${__from:date:YYYY-MM} COST</span>\n</div>\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.4.0",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "be8uoucbnjtogf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "displayName": "₩",
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "id": 46,
+      "interval": "30m",
+      "maxPerRow": 12,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "repeat": "Subscription",
+      "repeatDirection": "h",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "be8uoucbnjtogf"
+          },
+          "query": "SELECT LAST(\"total_cost\") FROM \"monthly_cost\" WHERE (\"subscription_id\"::tag = '$Subscription') AND time > now() - 24h",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series"
+        }
+      ],
+      "title": "${Subscription}",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "format": "json",
+            "jsonPaths": [
+              {
+                "path": "rows"
+              },
+              {
+                "path": "name"
+              }
+            ],
+            "replace": true,
+            "source": "properties"
+          }
+        },
+        {
+          "id": "extractFields",
+          "options": {
+            "format": "json",
+            "jsonPaths": [],
+            "replace": true,
+            "source": "rows"
+          }
+        },
+        {
+          "id": "extractFields",
+          "options": {
+            "replace": true,
+            "source": "0"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "0": false,
+              "1": true,
+              "2": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "0": 1,
+              "1": 0,
+              "2": 2
+            },
+            "renameByName": {
+              "0": "₩",
+              "1": "",
+              "2": ""
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "displayName": "총합  ₩",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 47,
+      "maxPerRow": 12,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 25,
+          "valueSize": 45
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "hide": false,
+          "panelId": 45,
+          "refId": "A"
+        }
+      ],
+      "title": "",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "format": "kvp",
+            "replace": true,
+            "source": "result"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "cost": false,
+              "subscriptionId": true,
+              "subscriptionName": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "number",
+                "targetField": "cost"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "filterable": false,
+            "inspect": false
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "비용(KRW)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "locale"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "blue",
+                      "value": null
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "구독 이름"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 45,
+      "interval": "30m",
+      "options": {
+        "cellHeight": "md",
+        "footer": {
+          "countRows": false,
+          "enablePagination": false,
+          "fields": [
+            "total_cost"
+          ],
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "frameIndex": 1,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "be8uoucbnjtogf"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            }
+          ],
+          "measurement": "monthly_cost",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"subscription_id\", \"total_cost\" FROM \"monthly_cost\" WHERE (\"subscription_id\"::tag = '4b0a5f96-43b7-4e90-9dc7-223cfa72c86b' OR \"subscription_id\"::tag = '5fbbb1e7-7f66-4904-ba32-dbf0a40f224f' OR \"subscription_id\"::tag = 'bcab936a-2388-454c-b309-1aca8620a15d' OR \"subscription_id\"::tag = 'ea01e5db-cabf-403f-9cc2-a6abf0d25f7b' OR \"subscription_id\"::tag = '5d98fd4c-bf45-4fe6-a554-68c369997297') AND time > now() - 24h",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "subscription_id"
+                ],
+                "type": "field"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "total_cost"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "subscription_id::tag",
+              "operator": "=",
+              "value": "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+            },
+            {
+              "condition": "OR",
+              "key": "subscription_id::tag",
+              "operator": "=",
+              "value": "5fbbb1e7-7f66-4904-ba32-dbf0a40f224f"
+            },
+            {
+              "condition": "OR",
+              "key": "subscription_id::tag",
+              "operator": "=",
+              "value": "bcab936a-2388-454c-b309-1aca8620a15d"
+            },
+            {
+              "condition": "OR",
+              "key": "subscription_id::tag",
+              "operator": "=",
+              "value": "ea01e5db-cabf-403f-9cc2-a6abf0d25f7b"
+            }
+          ]
+        },
+        {
+          "azureResourceGraph": {
+            "query": "resourcecontainers\r\n| where type == \"microsoft.resources/subscriptions\"\r\n| project subscriptionName = tostring(name), subscription_id = tostring(subscriptionId)"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "fe7gm4v3wqcxsa"
+          },
+          "hide": false,
+          "queryType": "Azure Resource Graph",
+          "refId": "E",
+          "subscriptions": [
+            "5d98fd4c-bf45-4fe6-a554-68c369997297",
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b",
+            "bcab936a-2388-454c-b309-1aca8620a15d",
+            "ea01e5db-cabf-403f-9cc2-a6abf0d25f7b",
+            "5fbbb1e7-7f66-4904-ba32-dbf0a40f224f"
+          ]
+        }
+      ],
+      "title": "구독별 월 비용",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 0,
+              "subscriptionName": 1,
+              "subscription_id": 2,
+              "total_cost": 3
+            },
+            "renameByName": {
+              "subscriptionName": "구독 이름",
+              "subscription_id": "구독 ID",
+              "total_cost": "비용(KRW)"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "비용(KRW)"
+              }
+            ]
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 0,
+        "y": 16
+      },
+      "id": 54,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: flex-end; height: 100%; color: #000000; font-size: 20px; flex-direction: column; text-align: left; width: 100%;\">\n    <span style=\"font-weight: bold;\">COMPUTE</span>\n</div>\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.4.0",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 6,
+        "x": 9,
+        "y": 16
+      },
+      "id": 53,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: flex-end; height: 100%; color: #000000; font-size: 20px; flex-direction: column; text-align: left; width: 100%;\">\n    <span style=\"font-weight: bold;\">NETWORK</span>\n</div>\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.4.0",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 16,
+        "y": 16
+      },
+      "id": 56,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: flex-end; height: 100%; color: #000000; font-size: 20px; flex-direction: column; text-align: left; width: 100%;\">\n    <span style=\"font-weight: bold;\">DATABASE</span>\n</div>\n\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.4.0",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "uid": "ae767fntl80zkd"
+      },
+      "description": "리소스 수량",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 2,
+        "x": 0,
+        "y": 18
+      },
+      "id": 15,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 14,
+          "valueSize": 30
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type =~ \"microsoft.compute/virtualmachines\" or type =~ \"microsoft.web/sites\" or type =~ \"microsoft.containerservice/managedclusters\"\r\n| project VM = countof(type,\"microsoft.compute/virtualmachines\"), Webapp = countof(type,\"microsoft.web/sites\"), AKS = countof(type,\"microsoft.containerservice/managedclusters\")"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$Subscription"
+          ]
+        }
+      ],
+      "title": "Total",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 6,
+        "x": 2,
+        "y": 18
+      },
+      "id": 64,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: center; height: 100%; color: #000000; font-size: 15px; flex-direction: column; text-align: center; width: 100%; background-color: white;\">\n    <span style=\"font-weight: 500;\">Status</span>\n</div>\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.4.0",
+      "title": "",
+      "type": "text"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 6,
+        "x": 9,
+        "y": 18
+      },
+      "id": 62,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: center; height: 100%; color: #000000; font-size: 13px; flex-direction: column; text-align: center; width: 100%; background-color: white;\">\n    <span style=\"font-weight: 700;\">부하 분산 장치</span>\n</div>\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.4.0",
+      "title": "",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "uid": "ae767fntl80zkd"
+      },
+      "description": "리소스 수량",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "Microsoft.Sql/servers": {
+                  "index": 6,
+                  "text": "MS SQL"
+                },
+                "microsoft.cache/redis": {
+                  "index": 0,
+                  "text": "Redis"
+                },
+                "microsoft.dbformysql/flexibleservers": {
+                  "index": 5,
+                  "text": "MySQL (flex)"
+                },
+                "microsoft.dbformysql/servers": {
+                  "index": 4,
+                  "text": "MySQL"
+                },
+                "microsoft.dbforpostgresql/flexibleservers": {
+                  "index": 2,
+                  "text": "PostgreSQL (flex)"
+                },
+                "microsoft.dbforpostgresql/servers": {
+                  "index": 1,
+                  "text": "PostgreSQL"
+                },
+                "microsoft.documentdb/databaseaccounts": {
+                  "index": 3,
+                  "text": "Cosmos DB"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 2,
+        "x": 16,
+        "y": 18
+      },
+      "id": 66,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 14,
+          "valueSize": 30
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type in ( \r\n    \"microsoft.dbforpostgresql/servers\",\r\n    \"microsoft.dbforpostgresql/flexibleservers\",\r\n    \"microsoft.cache/redis\",\r\n    \"microsoft.documentdb/databaseaccounts\",\r\n    \"microsoft.dbformysql/servers\",\r\n    \"microsoft.dbformysql/flexibleservers\",\r\n    \"Microsoft.Sql/servers\")\r\n| summarize count() by type\r\n| order by type asc\r\n"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$Subscription"
+          ]
+        }
+      ],
+      "title": "Total",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 6,
+        "x": 18,
+        "y": 18
+      },
+      "id": 60,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: center; height: 100%; color: #000000; font-size: 15px; flex-direction: column; text-align: center; width: 100%; background-color: white;\">\n    <span style=\"font-weight: 500;\">Status</span>\n</div>\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.4.0",
+      "title": "",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae767fntl80zkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000063",
+                "value": null
+              },
+              {
+                "color": "light-green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stoppedVMs"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "중지"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#646464",
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000063",
+                      "value": null
+                    },
+                    {
+                      "color": "#000000b0",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "runningVMs"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "실행"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 2,
+        "y": 19
+      },
+      "id": 17,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "",
+          "url": "http://20.249.129.183:3000/d/fe76be54f41kwf/vm?orgId=1&from=now-5m&to=now&timezone=browser&var-subscriptions=$__all&var-resourceGroup=&var-virtualmachinescalesets=akswindow&var-SubscriptionId=ea01e5db-cabf-403f-9cc2-a6abf0d25f7b"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.compute/virtualmachines\" // VM 리소스만 필터링\r\n| extend vmState = tostring(properties.extended.instanceView.powerState.code) // VM 상태 추출\r\n| where vmState == \"PowerState/running\" // 실행 중인 VM만 필터링\r\n| summarize runningVMs = count()\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae767fntl80zkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "실행중인 VM",
+          "subscriptions": [
+            "$Subscription"
+          ]
+        },
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.compute/virtualmachines\" // VM 리소스만 필터링\r\n| extend vmState = tostring(properties.extended.instanceView.powerState.code) // VM 상태 추출\r\n| where vmState == \"PowerState/deallocated\" // 중지된 VM만 필터링\r\n| summarize stoppedVMs = count()\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae767fntl80zkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "중지된 VM",
+          "subscriptions": [
+            "$Subscription"
+          ]
+        }
+      ],
+      "title": "VM",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae767fntl80zkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": -1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000063",
+                "value": null
+              },
+              {
+                "color": "light-green",
+                "value": -0.0003
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stoppedWebApps"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#00000063",
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000063",
+                      "value": null
+                    },
+                    {
+                      "color": "#000000b0",
+                      "value": 0.1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 4,
+        "y": 19
+      },
+      "id": 18,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "",
+          "url": "http://20.249.129.183:3000/d/ce7d8ojpgucqod/web-app?orgId=1&from=now-6h&to=now&timezone=browser&var-subscriptions=ea01e5db-cabf-403f-9cc2-a6abf0d25f7b"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.web/sites\" // Web App 리소스 필터링\r\n| extend deletionTime = todatetime(properties.deletionTimestamp) // 삭제 시간 추출\r\n| summarize \r\n    runningWebApps = countif(properties.state == \"Running\"), // 실행 중인 Web Apps 수\r\n    stoppedWebApps = countif(properties.state != \"Running\") // 중지된 Web Apps 수\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae767fntl80zkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$Subscription"
+          ]
+        }
+      ],
+      "title": "WEB APP",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "deletedWebApps": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "runningWebApps": 1,
+              "stoppedWebApps": 2,
+              "totalWebApps": 0
+            },
+            "renameByName": {
+              "deletedWebApps": "삭제됨",
+              "runningWebApps": "실행",
+              "stoppedWebApps": "중지",
+              "totalWebApps": "전체 webapp"
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae767fntl80zkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "value": {
+                  "index": 0,
+                  "text": "수"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#000000b0",
+                "value": null
+              },
+              {
+                "color": "light-green",
+                "value": 0.1
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stoppedAKSCount"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#646464",
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000063",
+                      "value": null
+                    },
+                    {
+                      "color": "#000000b0",
+                      "value": 0.1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 6,
+        "y": 19
+      },
+      "id": 21,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "",
+          "url": "http://20.249.129.183:3000/d/ee767t0jqqkg0f/aks?orgId=1&from=now-6h&to=now&timezone=browser&var-subscriptions=5d98fd4c-bf45-4fe6-a554-68c369997297"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.containerservice/managedclusters\"\r\n| extend powerState = tostring(properties.powerState.code)\r\n| summarize \r\n    runningAKSCount = countif(powerState == \"Running\"),\r\n    stoppedAKSCount = countif(powerState == \"Stopped\")\r\n| mv-expand state = pack_array(\"Running AKS\", \"Stopped AKS\"), \r\n                    value = pack_array(runningAKSCount, stoppedAKSCount)\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae767fntl80zkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$Subscription"
+          ]
+        }
+      ],
+      "title": "AKS",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "deletedAKSCount": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "deletedAKSCount": "삭제된 AKS",
+              "runningAKSCount": "실행",
+              "state": "",
+              "stoppedAKSCount": "중지",
+              "value": ""
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "fe7gm4v3wqcxsa"
+      },
+      "description": "Load Balancer Probe",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "fieldMinMax": false,
+          "links": [],
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "index": 0,
+                  "text": "Error"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              },
+              {
+                "color": "light-red",
+                "value": 30
+              },
+              {
+                "color": "light-orange",
+                "value": 50
+              },
+              {
+                "color": "light-yellow",
+                "value": 90
+              },
+              {
+                "color": "text",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byValue",
+              "options": {
+                "op": "lt",
+                "reducer": "lastNotNull",
+                "value": 100
+              }
+            },
+            "properties": []
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 9,
+        "y": 19
+      },
+      "id": 37,
+      "links": [
+        {
+          "title": "",
+          "url": "http://20.249.129.183:3000/d/ae1p45ghgeznkd/sy-test?orgId=1&from=now-1h&to=now&timezone=browser&var-ds=fe7gm4v3wqcxsa&var-subscription=bcab936a-2388-454c-b309-1aca8620a15d&var-resourceGroup_LB=aks-node-RG&var-loadBalancer=kubernetes&var-resourceGroup_AGW=aks-node-RG&var-agw=applicationgateway&var-resourceGroup_VPN=sy-vpn-rg&var-VPN=$__all"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 15,
+          "valueSize": 30
+        },
+        "textMode": "value_and_name",
+        "wideLayout": false
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "alias": "LB : {{resourcename}}",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "dimensionFilters": [],
+            "metricName": "DipAvailability",
+            "metricNamespace": "microsoft.network/loadbalancers",
+            "region": "koreacentral",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Network/loadBalancers",
+                "region": "koreacentral",
+                "resourceGroup": "aks-node-RG",
+                "resourceName": "kubernetes",
+                "subscription": "bcab936a-2388-454c-b309-1aca8620a15d"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "fe7gm4v3wqcxsa"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "bcab936a-2388-454c-b309-1aca8620a15d"
+        }
+      ],
+      "title": "LB Probe",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "fe7gm4v3wqcxsa"
+      },
+      "description": "Application Gateway 백엔드 응답 상태",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "thresholds"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000066",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0.1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000066",
+                      "value": null
+                    },
+                    {
+                      "color": "#00000099",
+                      "value": 0.1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 12,
+        "y": 19
+      },
+      "id": 49,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 15,
+          "valueSize": 50
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "alias": "Healthy",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "dimensionFilters": [],
+            "metricName": "HealthyHostCount",
+            "metricNamespace": "microsoft.network/applicationgateways",
+            "region": "koreacentral",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Network/applicationGateways",
+                "region": "koreacentral",
+                "resourceGroup": "aks-node-RG",
+                "resourceName": "applicationgateway",
+                "subscription": "bcab936a-2388-454c-b309-1aca8620a15d"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": ""
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "fe7gm4v3wqcxsa"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "bcab936a-2388-454c-b309-1aca8620a15d"
+        },
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "alias": "Unhealthy",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "dimensionFilters": [],
+            "metricName": "UnhealthyHostCount",
+            "metricNamespace": "microsoft.network/applicationgateways",
+            "region": "koreacentral",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Network/applicationGateways",
+                "region": "koreacentral",
+                "resourceGroup": "aks-node-RG",
+                "resourceName": "applicationgateway",
+                "subscription": "bcab936a-2388-454c-b309-1aca8620a15d"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": ""
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "fe7gm4v3wqcxsa"
+          },
+          "hide": false,
+          "queryType": "Azure Monitor",
+          "refId": "C",
+          "subscription": "bcab936a-2388-454c-b309-1aca8620a15d"
+        }
+      ],
+      "title": "AGW Backend Status",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae7672wvmbxfkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000063",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0.1
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stoppedRedisCaches"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "중지"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000063",
+                      "value": null
+                    },
+                    {
+                      "color": "#000000b0",
+                      "value": 0.1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "succeededRedisCaches"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "실행"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 18,
+        "y": 19
+      },
+      "id": 59,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "",
+          "url": "http://20.249.129.183:3000/d/Mtwt2BV7k/azure-paas-database-eventandlist?orgId=1&from=now-1h&to=now&timezone=browser&var-ds=fe7gm4v3wqcxsa&var-subscriprions=4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.cache/redis\" // Redis Cache 리소스 필터링\r\n| extend cacheState = tostring(properties.provisioningState) // 캐시 상태 추출\r\n| where cacheState == \"Succeeded\" or cacheState == \"Stopped\" // 상태 필터링\r\n| project succeededRedisCaches = countof(cacheState,\"Succeeded\"), stoppedRedisCaches = countof(cacheState,\"stopped\")\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae7672wvmbxfkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "사용 가능한 Redis",
+          "subscriptions": [
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+          ]
+        }
+      ],
+      "title": "Cache for Redis",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae7672wvmbxfkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000066",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0.1
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stoppedPostgreSQLServers"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "중지"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000066",
+                      "value": null
+                    },
+                    {
+                      "color": "#00000099",
+                      "value": 0.1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "readyPostgreSQLServers"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "실행"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 20,
+        "y": 19
+      },
+      "id": 26,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "",
+          "url": "http://20.249.129.183:3000/d/Mtwt2BV7k/azure-paas-database-eventandlist?orgId=1&from=now-1h&to=now&timezone=browser&var-ds=fe7gm4v3wqcxsa&var-subscriprions=4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type in (\"microsoft.dbforpostgresql/servers\", \"microsoft.dbforpostgresql/flexibleservers\") // PostgreSQL 리소스 필터링\r\n| extend serverState = tostring(properties.state) // 서버 상태 추출\r\n| where serverState == \"Ready\" or serverState == \"Stopped\"\r\n| project readyPostgreSQLServers = countof(serverState,\"Ready\"), stoppedPostgreSQLServers= countof(serverState,\"Stopped\")\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae7672wvmbxfkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "PostgreSQL",
+          "subscriptions": [
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+          ]
+        }
+      ],
+      "title": "PostgreSQL",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae7672wvmbxfkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000066",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0.1
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stoppedAccounts"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "중지"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000066",
+                      "value": null
+                    },
+                    {
+                      "color": "#00000099",
+                      "value": 80
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "succeededAccounts"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "실행"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 22,
+        "y": 19
+      },
+      "id": 28,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "",
+          "url": "http://20.249.129.183:3000/d/Mtwt2BV7k/azure-paas-database-eventandlist?orgId=1&from=now-1h&to=now&timezone=browser&var-ds=fe7gm4v3wqcxsa&var-subscriprions=4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.documentdb/databaseaccounts\" // Cosmos DB 계정 리소스 필터링\r\n| extend accountState = tostring(properties.provisioningState) // 계정 상태 추출\r\n| where accountState == \"Succeeded\" or accountState == \"Stopped\" \r\n| project succeededAccounts = countof(accountState,\"Succeeded\"), stoppedAccounts = countof(accountState,\"stopped\")\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae7672wvmbxfkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "CosmosDB",
+          "subscriptions": [
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+          ]
+        }
+      ],
+      "title": "CosmosDB",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 6,
+        "x": 2,
+        "y": 23
+      },
+      "id": 61,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: center; height: 100%; color: #000000; font-size: 13px; flex-direction: column; text-align: center; width: 100%; background-color: white;\">\n    <span style=\"font-weight: 700;\">생성 / 삭제 (24시간)</span>\n</div>\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.4.0",
+      "title": "",
+      "type": "text"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 6,
+        "x": 9,
+        "y": 23
+      },
+      "id": 63,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: center; height: 100%; color: #000000; font-size: 15px; flex-direction: column; text-align: center; width: 100%; background-color: white;\">\n    <span style=\"font-weight: 500;\">VPN</span>\n</div>\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.4.0",
+      "title": "",
+      "type": "text"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 6,
+        "x": 18,
+        "y": 23
+      },
+      "id": 65,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: flex-end; height: 100%; color: #000000; font-size: 20px; flex-direction: column; text-align: left; width: 100%;\">\n    <span style=\"font-weight: bold;\"></span>\n</div>\n\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.4.0",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae767fntl80zkd"
+      },
+      "description": "24시간 이내 생성 및 삭제된  VM 수",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000063"
+              },
+              {
+                "color": "light-green",
+                "value": 0.1
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "deletedVMCount"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-red",
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000063"
+                    },
+                    {
+                      "color": "#00000063",
+                      "value": 0.1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 2,
+        "y": 24
+      },
+      "id": 58,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type =~ \"Microsoft.Compute/virtualMachineScaleSets/virtualMachines\" // VMSS 내 VM 인스턴스 필터링\r\n| extend creationTime = todatetime(properties.timeCreated) // 생성 시간 추출\r\n| extend deletionTime = todatetime(properties.deletionTimestamp) // 삭제 시간 추출\r\n| summarize \r\n    createdVMCount = countif(creationTime > ago(24h)), // 최근 24시간 내 생성된 VM 수\r\n    deletedVMCount = countif(deletionTime > ago(24h)) // 최근 24시간 내 삭제된 VM 수\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae767fntl80zkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$Subscription"
+          ]
+        }
+      ],
+      "title": "VM",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "createdVMCount": "생성",
+              "deletedVMCount": "삭제"
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae767fntl80zkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000063"
+              },
+              {
+                "color": "light-green",
+                "value": 0.1
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "삭제"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000063"
+                    },
+                    {
+                      "color": "#000000b0",
+                      "value": 0.1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 4,
+        "y": 24
+      },
+      "id": 19,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type =~ \"Microsoft.Web/sites\" // Web App 리소스 필터링\r\n| extend creationTime = todatetime(properties.createdTime) // 생성 시간 추출\r\n| extend deletionTime = todatetime(properties.deletionTimestamp) // 삭제 시간 추출\r\n| summarize \r\n    createdWebAppCount = countif(creationTime > ago(24h)), // 최근 24시간 내 생성된 Web App 수\r\n    deletedWebAppCount = countif(deletionTime > ago(24h)) // 최근 24시간 내 삭제된 Web App 수\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae767fntl80zkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$Subscription"
+          ]
+        }
+      ],
+      "title": "WEBAPP",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "createdWebAppCount": "생성",
+              "deletedWebAppCount": "삭제"
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae767fntl80zkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000063"
+              },
+              {
+                "color": "light-green",
+                "value": 0.1
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "deletedAKSCount"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000063"
+                    },
+                    {
+                      "color": "#000000b0",
+                      "value": 0.1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 6,
+        "y": 24
+      },
+      "id": 20,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type =~ \"Microsoft.ContainerService/managedClusters\" // AKS 리소스 필터링\r\n| extend creationTime = todatetime(properties.createdTime) // 생성 시간 추출\r\n| extend deletionTime = todatetime(properties.deletionTimestamp) // 삭제 시간 추출\r\n| summarize \r\n    createdAKSCount = countif(creationTime > ago(24h)), // 최근 24시간 내 생성된 AKS 클러스터 수\r\n    deletedAKSCount = countif(deletionTime > ago(24h)) // 최근 24시간 내 삭제된 AKS 클러스터 수\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae767fntl80zkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$Subscription"
+          ]
+        }
+      ],
+      "title": "AKS",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "createdAKSCount": "생성",
+              "deletedAKSCount": "삭제"
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae766aldv8hz4a"
+      },
+      "description": "VPN S2S 연결 상태",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Unhealthy": {
+                        "color": "red",
+                        "index": 1
+                      },
+                      "Unknown": {
+                        "color": "semi-dark-orange",
+                        "index": 0
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 9,
+        "y": 24
+      },
+      "id": 38,
+      "links": [
+        {
+          "title": "",
+          "url": "http://20.249.129.183:3000/d/ae1p45ghgeznkd/sy-test?orgId=1&from=now-1h&to=now&timezone=browser&var-ds=fe7gm4v3wqcxsa&var-subscription=bcab936a-2388-454c-b309-1aca8620a15d&var-resourceGroup_LB=aks-node-RG&var-loadBalancer=kubernetes&var-resourceGroup_AGW=aks-node-RG&var-agw=applicationgateway&var-resourceGroup_VPN=sy-vpn-rg&var-VPN=$__all"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^Status$/",
+          "values": true
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 15,
+          "valueSize": 30
+        },
+        "textMode": "value_and_name",
+        "wideLayout": false
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type contains \"Microsoft.Network/connections\" and name =~ \"sy-vpn-ai-s2s\"\r\n| parse properties.virtualNetworkGateway1.id with * \"/Microsoft.Network/virtualNetworkGateways/\" VNG_Name\r\n| parse properties.localNetworkGateway2.id with * \"/Microsoft.Network/localNetworkGateways/\" LNG_Name\r\n| project name, Status=tostring(properties.connectionStatus)"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae766aldv8hz4a"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "bcab936a-2388-454c-b309-1aca8620a15d"
+          ]
+        }
+      ],
+      "title": "S2S Status",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae766aldv8hz4a"
+      },
+      "description": "VPN P2S 사용자 수",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000066"
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 12,
+        "y": 24
+      },
+      "id": 39,
+      "interval": "1",
+      "links": [
+        {
+          "title": "",
+          "url": "http://20.249.129.183:3000/d/ae1p45ghgeznkd/sy-test?orgId=1&from=now-1h&to=now&timezone=browser&var-ds=fe7gm4v3wqcxsa&var-subscription=bcab936a-2388-454c-b309-1aca8620a15d&var-resourceGroup_LB=aks-node-RG&var-loadBalancer=kubernetes&var-resourceGroup_AGW=aks-node-RG&var-agw=applicationgateway&var-resourceGroup_VPN=sy-vpn-rg&var-VPN=$__all"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 15,
+          "valueSize": 60
+        },
+        "textMode": "value_and_name",
+        "wideLayout": false
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Maximum",
+            "alias": "{{resourcename}}",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "dimensionFilters": [],
+            "metricName": "P2SConnectionCount",
+            "metricNamespace": "microsoft.network/virtualnetworkgateways",
+            "region": "koreacentral",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Network/virtualNetworkGateways",
+                "region": "koreacentral",
+                "resourceGroup": "sy-vpn-rg",
+                "resourceName": "sy-vpn-ai-vng",
+                "subscription": "bcab936a-2388-454c-b309-1aca8620a15d"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": ""
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae766aldv8hz4a"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "bcab936a-2388-454c-b309-1aca8620a15d"
+        }
+      ],
+      "title": "P2S Client ",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae7672wvmbxfkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000066"
+              },
+              {
+                "color": "green",
+                "value": 0.1
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stoppedMySQLServers"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "중지"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000066"
+                    },
+                    {
+                      "color": "#00000099",
+                      "value": 0.1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "readyMySQLServers"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "실행"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 18,
+        "y": 24
+      },
+      "id": 27,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "",
+          "url": "http://20.249.129.183:3000/d/Mtwt2BV7k/azure-paas-database-eventandlist?orgId=1&from=now-1h&to=now&timezone=browser&var-ds=fe7gm4v3wqcxsa&var-subscriprions=4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type in (\"microsoft.dbformysql/servers\", \"microsoft.dbformysql/flexibleservers\") // MySQL 리소스 필터링\r\n| extend serverState = tostring(properties.state) // 서버 상태 추출\r\n| where serverState == \"Ready\" or serverState == \"Stopped\" \r\n| project readyMySQLServers = countof(serverState,\"Ready\"), stoppedMySQLServers = countof(serverState,\"Stopped\")\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae7672wvmbxfkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "MySQL",
+          "subscriptions": [
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+          ]
+        }
+      ],
+      "title": "MySQL",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae7672wvmbxfkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000066"
+              },
+              {
+                "color": "green",
+                "value": 0.1
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stoppedSQLServers"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "중지"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000066"
+                    },
+                    {
+                      "color": "#00000099",
+                      "value": 0.1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "readySQLServers"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "실행"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 20,
+        "y": 24
+      },
+      "id": 25,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "",
+          "url": "http://20.249.129.183:3000/d/Mtwt2BV7k/azure-paas-database-eventandlist?orgId=1&from=now-1h&to=now&timezone=browser&var-ds=fe7gm4v3wqcxsa&var-subscriprions=4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type =~ \"Microsoft.Sql/servers\" // Microsoft SQL 서버 리소스 필터링\r\n| extend serverState = tostring(properties.state) // 서버 상태 추출\r\n| where serverState == \"Ready\" or serverState == \"Stopped\" // 상태 필터링\r\n| project readySQLServers = countof(serverState,\"Ready\"), stoppedSQLServers = countof(serverState,\"Stoppped\")\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae7672wvmbxfkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "MSSQL",
+          "subscriptions": [
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+          ]
+        }
+      ],
+      "title": "MSSQL",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "ae7672wvmbxfkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00000066"
+              },
+              {
+                "color": "green",
+                "value": 0.1
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pausedDatabases"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "중지"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#00000066"
+                    },
+                    {
+                      "color": "#00000099",
+                      "value": 0.1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "onlineDatabases"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "실행"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 22,
+        "y": 24
+      },
+      "id": 31,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "",
+          "url": "http://20.249.129.183:3000/d/Mtwt2BV7k/azure-paas-database-eventandlist?orgId=1&from=now-1h&to=now&timezone=browser&var-ds=fe7gm4v3wqcxsa&var-subscriprions=4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type =~ \"Microsoft.Sql/servers/databases\" // Microsoft SQL 데이터베이스 리소스 필터링\r\n| extend databaseState = tostring(properties.status) // 데이터베이스 상태 추출\r\n| where databaseState == \"Online\" or  databaseState == \"Paused\"// 상태 필터링\r\n| project onlineDatabases = countof(databaseState, \"Online\"),  pausedDatabases = countof(databaseState, \"paused\")\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "ae7672wvmbxfkd"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "MSSQL DB",
+          "subscriptions": [
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b"
+          ]
+        }
+      ],
+      "title": "MSSQL DB",
+      "type": "stat"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": [
+            "(shseo)Visual Studio Enterprise 구독 - MPN(shseo-new)",
+            "SYSONG - MPN",
+            "Visual Studio Enterprise 구독 - MPN(minsun)",
+            "Visual Studio Enterprise 구독 - MPN(eunbi)"
+          ],
+          "value": [
+            "4b0a5f96-43b7-4e90-9dc7-223cfa72c86b",
+            "bcab936a-2388-454c-b309-1aca8620a15d",
+            "ea01e5db-cabf-403f-9cc2-a6abf0d25f7b",
+            "5fbbb1e7-7f66-4904-ba32-dbf0a40f224f"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-azure-monitor-datasource",
+          "uid": "fe7gm4v3wqcxsa"
+        },
+        "definition": "",
+        "includeAll": true,
+        "label": "구독",
+        "multi": true,
+        "name": "Subscription",
+        "options": [],
+        "query": {
+          "azureLogAnalytics": {
+            "query": "",
+            "resources": []
+          },
+          "queryType": "Azure Subscriptions",
+          "refId": "A"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "** Overview v0.2**",
+  "uid": "eec3s4c8quepsd",
+  "version": 20,
+  "weekStart": ""
+}

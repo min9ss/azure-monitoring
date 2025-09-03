@@ -1,0 +1,1565 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_MPN-MINSUN",
+      "label": "mpn-minsun",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "grafana-azure-monitor-datasource",
+      "pluginName": "Azure Monitor"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.4.0"
+    },
+    {
+      "type": "datasource",
+      "id": "grafana-azure-monitor-datasource",
+      "name": "Azure Monitor",
+      "version": "11.3.1"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "runningWebApps"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "runningWebApps"
+            },
+            "properties": []
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 2,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type == \"microsoft.web/sites\"\r\n| summarize \r\n    totalWebApps = count(), \r\n    runningWebApps = countif(properties.state == \"Running\"), \r\n    stoppedWebApps = countif(properties.state != \"Running\")\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {
+              "runningWebApps": 1,
+              "stoppedWebApps": 2,
+              "totalWebApps": 0
+            },
+            "renameByName": {
+              "runningWebApps": "실행",
+              "stoppedWebApps": "중지",
+              "totalWebApps": "전체"
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "location"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 161
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "resourceGroup"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "webAppName"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 139
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "capacity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 116
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "sku"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 108
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "상태"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 103
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "appServicePlanName"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 147
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "WebApp 이름"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 126
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ip 주소"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 139
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "앱 서비스 플랜 이름"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 156
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "호스트 도메인"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 420
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "사용자 지정 도메인"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 493
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "리소스 그룹"
+            },
+            "properties": [
+              {
+                "id": "custom.width"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "인스턴스 수"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 96
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "앱 서비스 플랜"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 164
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "크기"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 91
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "IP"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "WebApp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 14,
+        "x": 3,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.web/sites\" // Web App 리소스 필터링\r\n| extend appServicePlanId = tostring(properties.serverFarmId) // Web App의 App Service Plan ID\r\n| extend appServicePlanId = tolower(split(appServicePlanId, '/')[8]) // ID에서 Plan 이름 추출\r\n| extend state = tostring(properties.state) // Web App 상태 추가\r\n| extend defaultHostName = tostring(properties.defaultHostName) // 기본 호스트 이름\r\n| extend enabledHostNames = strcat_array(todynamic(properties.enabledHostNames), \", \") // 활성화된 호스트 이름 병합\r\n| extend inboundIpAddress = tostring(properties.inboundIpAddress) // Web App의 인바운드 IP 주소 추가\r\n| project \r\n    webAppName = name, \r\n    resourceGroup, \r\n    location, \r\n    defaultHostName, \r\n    enabledHostNames, \r\n    inboundIpAddress, // IP 주소 추가\r\n    appServicePlanId, \r\n    state\r\n| join kind=leftouter (\r\n    Resources\r\n    | where type == \"microsoft.web/serverfarms\" // App Service Plan 리소스 필터링\r\n    | extend appServicePlanId = tolower(name) // App Service Plan 이름으로 조인\r\n    | project \r\n        appServicePlanId, \r\n        appServicePlanName = name, \r\n        sku = tostring(sku.tier), \r\n        capacity = tostring(sku.capacity)\r\n) on appServicePlanId\r\n| project \r\n    webAppName, \r\n    resourceGroup, \r\n    location, \r\n    defaultHostName, \r\n    enabledHostNames, \r\n    inboundIpAddress, // IP 주소 추가\r\n    state, \r\n    appServicePlanName, \r\n    sku, \r\n    capacity\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "Webapp 리스트",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "enabledHostNames": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "appServicePlanName": 5,
+              "capacity": 4,
+              "defaultHostName": 6,
+              "enabledHostNames": 7,
+              "inboundIpAddress": 3,
+              "location": 9,
+              "resourceGroup": 8,
+              "sku": 2,
+              "state": 1,
+              "webAppName": 0
+            },
+            "renameByName": {
+              "appServicePlanName": "앱 서비스 플랜",
+              "capacity": "인스턴스",
+              "defaultHostName": "호스트 도메인",
+              "enabledHostNames": "사용자 지정 도메인",
+              "inboundIpAddress": "IP",
+              "location": "지역",
+              "resourceGroup": "리소스 그룹",
+              "sku": "크기",
+              "state": "상태",
+              "webAppName": "WebApp"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "작업 유형"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 92
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "작업 시간"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 183
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "WebApp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 141
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "리소스 그룹"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 121
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "지역"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 122
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "사용자"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "WebApp "
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 174
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "리소스 이름"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 140
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "webapp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 107
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Webapp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 7,
+        "x": 17,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resourcechanges\r\n| where type == 'microsoft.resources/changes'\r\n| extend timestamp = todatetime(properties.changeAttributes.timestamp),\r\n    change_type = properties.changeType,\r\n    changed_by = properties.changeAttributes.changedBy,\r\n    resource = tostring(split(properties.targetResourceType, \"/\")[array_length(split(properties.targetResourceType, \"/\")) -1]),\r\n    resource_name = tostring(split(properties.targetResourceId, \"/\")[array_length(split(properties.targetResourceId, \"/\")) - 1])\r\n| where timestamp >= ago(24h) and change_type != \"Update\"\r\n| where resource == \"sites\"  // 'microsoft.web/sites' 리소스를 필터링\r\n| project format_datetime(timestamp, 'yyyy/MM/dd HH:mm:ss'), tostring(resource), tostring(resource_name), tostring(changed_by), tostring(change_type)\r\n| order by timestamp desc\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "Webapp 활동 로그",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "operation": true,
+              "previousState": true,
+              "resource": true,
+              "resourceId": true,
+              "구독 ID": true,
+              "이전 상태값": true,
+              "작업 ID": true,
+              "작업 유형": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "change_type": 2,
+              "changed_by": 3,
+              "resource": 4,
+              "resource_name": 1,
+              "timestamp": 0
+            },
+            "renameByName": {
+              "ActionTime": "작업 시간",
+              "ActionType": "작업 유형",
+              "LocalTime": "작업 시간",
+              "Location": "지역",
+              "User": "사용자",
+              "WebAppName": "WebApp ",
+              "changeTime": "작업 시간",
+              "change_type": "작업 유형",
+              "changedBy": "사용자",
+              "changed_by": "사용자",
+              "newState": "작업 유형",
+              "operation": "",
+              "previousState": "",
+              "resourceGroup": "리소스 그룹",
+              "resourceId": "",
+              "resourceName": "webapp",
+              "resource_name": "Webapp",
+              "subscriptionName": "구독",
+              "timestamp": "작업 시간",
+              "리소스 이름": "webapp",
+              "새로운 상태값": "작업 유형"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 0,
+        "y": 10
+      },
+      "id": 17,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.web/sites/slots\" // Web App 슬롯 리소스 필터링\r\n| summarize totalSlotCount = count() // 슬롯 개수 합산\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "전체 슬롯",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "state"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 154
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "slotName"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 129
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "appName"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 140
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "resourceGroup"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 161
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "location"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 154
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "url"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 546
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "URL"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 551
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "앱서비스플랜"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 192
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "앱서비스"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 164
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "상태"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 104
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 14,
+        "x": 3,
+        "y": 10
+      },
+      "id": 7,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type == \"microsoft.web/sites/slots\" // 배포 슬롯 리소스 필터링\r\n| project \r\n    slotName = tostring(split(name, \"/\")[1]), // 슬롯 이름만 추출\r\n    appName = tostring(split(name, \"/\")[0]), // 웹앱 이름\r\n    resourceGroup, // 리소스 그룹 이름\r\n    location, // 리소스 위치\r\n    state = tostring(properties.state), // 슬롯 상태 (Running, Stopped)\r\n    url = tostring(properties.enabledHostNames[0]), // 슬롯 URL\r\n    appServicePlanName = tostring(split(properties.serverFarmId, \"/\")[-1]) // 서버팜 ID에서 서비스 플랜 이름 추출\r\n| order by appName asc, slotName asc\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "Slot 리스트",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {
+              "appName": 1,
+              "appServicePlanName": 4,
+              "location": 6,
+              "resourceGroup": 5,
+              "slotName": 0,
+              "state": 2,
+              "url": 3
+            },
+            "renameByName": {
+              "appName": "앱서비스",
+              "appServicePlanName": "앱서비스플랜",
+              "location": "지역",
+              "resourceGroup": "리소스 그룹",
+              "slotName": "슬롯",
+              "state": "상태",
+              "url": "URL"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "webapp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 308
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 7,
+        "x": 17,
+        "y": 10
+      },
+      "id": 18,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "Resources\r\n| where type == \"microsoft.web/sites\"\r\n| extend appName = tostring(name)\r\n| join kind=leftouter (\r\n    Resources\r\n    | where type == \"microsoft.web/sites/slots\"\r\n    | extend appName = tostring(split(name, \"/\")[0])\r\n    | summarize slotCount = count() by appName, resourceGroup\r\n) on appName, resourceGroup\r\n| project appName, resourceGroup, slotCount = coalesce(slotCount, 0)\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "Webapp 별 슬롯 수",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "resourceGroup": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "appName": "webapp",
+              "resourceGroup": "",
+              "slotCount": "슬롯 수"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 0,
+        "y": 15
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resourcechanges\r\n| where properties.targetResourceType == \"microsoft.web/sites/slots\" // 배포 슬롯 리소스 변경 추적\r\n| extend changeTime = todatetime(properties.changeAttributes.timestamp) // 변경 시간\r\n| where changeTime > ago(7d) // 최근 7일 데이터 필터링\r\n| extend \r\n    slotName = tostring(split(properties.targetResourceId, \"/\")[-1]), // 슬롯 이름 (마지막 부분)\r\n    appName = tostring(split(properties.targetResourceId, \"/\")[-3]), // Web App 이름 (슬롯 이름 바로 앞 부분)\r\n    resourceGroup = tostring(split(properties.targetResourceId, \"/\")[4]), // 리소스 그룹 이름\r\n    changeType = tostring(properties.changeType), // 변경 유형 (Create, Delete, Update)\r\n    previousState = tostring(properties.changes[\"properties.state\"].previousValue), // 이전 상태\r\n    newState = tostring(properties.changes[\"properties.state\"].newValue) // 새로운 상태\r\n| extend stateChange = iff(changeType == \"Update\", strcat(previousState, \" → \", newState), \"\") // 상태 변경 요약\r\n| summarize TotalEventCount = count() // 총 이벤트 발생 횟수 합산\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "상태 변경",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "상태"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 243
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "작업 시간"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 380
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "작업 유형"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 216
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "슬롯"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 233
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "앱서비스"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 292
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 14,
+        "x": 3,
+        "y": 15
+      },
+      "id": 10,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resourcechanges\r\n| where properties.targetResourceType == \"microsoft.web/sites/slots\" // 배포 슬롯 리소스 변경 추적\r\n| extend changeTime = todatetime(properties.changeAttributes.timestamp) // 변경 시간\r\n| where changeTime > ago(7d) // 최근 7일 데이터 필터링\r\n| extend \r\n    slotName = strcat(split(properties.targetResourceId, \"/\")[-1]), // 슬롯 이름 (마지막 부분)\r\n    appName = strcat(split(properties.targetResourceId, \"/\")[-3]), // Web App 이름 (슬롯 이름 바로 앞 부분)\r\n    resourceGroup = strcat(split(properties.targetResourceId, \"/\")[4]), // 리소스 그룹 이름\r\n    changeType = tostring(properties.changeType), // 변경 유형 (Create, Delete, Update)\r\n    previousState = tostring(properties.changes[\"properties.state\"].previousValue), // 이전 상태\r\n    newState = tostring(properties.changes[\"properties.state\"].newValue) // 새로운 상태\r\n| project \r\n    changeTime, \r\n    changeType, // 이벤트 유형 (Create, Delete, Update)\r\n    slotName, \r\n    appName, \r\n    resourceGroup, \r\n    stateChange = iff(changeType == \"Update\", strcat(previousState, \" → \", newState), \"\"), // 상태 변경 요약\r\n    newState // 새로운 상태 (Update인 경우만 표시)\r\n| order by changeTime desc\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "Slot 변경 작업",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "newState": true,
+              "stateChange": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "appName": 3,
+              "changeTime": 0,
+              "changeType": 1,
+              "newState": 5,
+              "resourceGroup": 6,
+              "slotName": 2,
+              "stateChange": 4
+            },
+            "renameByName": {
+              "appName": "앱서비스",
+              "changeTime": "작업 시간",
+              "changeType": "작업 유형",
+              "newState": "상태",
+              "resourceGroup": "리소스그룹",
+              "slotName": "슬롯",
+              "stateChange": "변경"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_MPN-MINSUN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "appName"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 106
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "sslState"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "hostName"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 227
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "호스트 이름"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 235
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ssl 상태"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 122
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "webapp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 122
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 7,
+        "x": 17,
+        "y": 15
+      },
+      "id": 11,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "azureResourceGraph": {
+            "query": "resources\r\n| where type == \"microsoft.web/sites\"\r\n| extend sslCertStatus = properties.hostNameSslStates\r\n| mv-expand sslCertStatus\r\n| project \r\n    appName = tostring(name), \r\n    hostName = tostring(sslCertStatus.name), \r\n    sslState = tostring(sslCertStatus.sslState), \r\n    certThumbprint = tostring(sslCertStatus.thumbprint)\r\n| where not(hostName contains \".scm.\") // SCM 호스트 이름 제외\r\n| order by appName asc\r\n"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_MPN-MINSUN}"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$subscriptions"
+          ]
+        }
+      ],
+      "title": "webapp ssl 인증서 상태",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "appName": "webapp",
+              "certThumbprint": "인증서 식별자",
+              "hostName": "호스트 이름",
+              "sslState": "ssl 상태"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "grafana-azure-monitor-datasource",
+          "uid": "${DS_MPN-MINSUN}"
+        },
+        "definition": "",
+        "includeAll": true,
+        "multi": true,
+        "name": "subscriptions",
+        "options": [],
+        "query": {
+          "azureLogAnalytics": {
+            "query": "",
+            "resources": []
+          },
+          "queryType": "Azure Subscriptions",
+          "refId": "A"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "5. Webapp",
+  "uid": "ce7d8ojpgucqod",
+  "version": 141,
+  "weekStart": ""
+}
